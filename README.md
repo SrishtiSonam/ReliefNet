@@ -63,7 +63,6 @@ Before running the app, generate the test data (districts, roads, demand curves)
 Keep the terminal open and run:
 
 ```cmd
-   venv\Scripts\activate 
    python backend/app.py
 ```
 *Success: You should see `Uvicorn running on http://0.0.0.0:8000`.*
