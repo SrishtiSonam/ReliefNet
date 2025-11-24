@@ -39,10 +39,10 @@ We have provided a one-click setup script for Windows users.
 1. **Open Terminal** (Command Prompt or PowerShell).
 2. **Navigate to the project folder**:
    ```cmd
-   cd project
-   python -m venv venv
+   C:\Users\Srish\AppData\Local\Programs\Python\Python311\python.exe --version
+   C:\Users\Srish\AppData\Local\Programs\Python\Python311\python.exe -m venv venv
+   venv\Scripts\activate  
    pip install -r requirements.txt
-   venv\Scripts\python backend/app.py
    ```
 
 ## 🏃‍♂️ How to Run the Project
@@ -54,8 +54,8 @@ Before running the app, generate the test data (districts, roads, demand curves)
 *Make sure your virtual environment is activated!*
 
 ```cmd
-venv\Scripts\activate
-python data/generator.py
+   venv\Scripts\activate 
+   python data/generator.py
 ```
 *Output: CSV files will be created in `data/`.*
 
@@ -63,7 +63,8 @@ python data/generator.py
 Keep the terminal open and run:
 
 ```cmd
-python backend/app.py
+   venv\Scripts\activate 
+   python backend/app.py
 ```
 *Success: You should see `Uvicorn running on http://0.0.0.0:8000`.*
 
