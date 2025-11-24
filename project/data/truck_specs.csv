@@ -1,0 +1,3 @@
+type,capacity_kg,speed_kmh,cost_per_km
+Heavy_Truck,5000,60,2.5
+Light_Truck,1500,80,1.5
