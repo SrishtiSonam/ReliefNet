@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7.0
+    container_name: sdpd-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - sdpd-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Express API Gateway
+  backend-express:
+    build:
+      context: ./backend-express
+      dockerfile: Dockerfile
+    container_name: sdpd-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/sdpd_db
+      - JWT_SECRET=your-secret-key-change-in-production
+      - JWT_EXPIRE=24h
+      - PORT=5000
+      - NODE_ENV=development
+      - FORECASTING_SERVICE_URL=http://forecasting_service:8001
+      - ROUTING_SERVICE_URL=http://routing_service:8002
+      - DECISION_SERVICE_URL=http://decision_service:8003
+      - REQUEST_TIMEOUT=30000
+    depends_on:
+      mongo:
+        condition: service_healthy
+      forecasting_service:
+        condition: service_started
+      routing_service:
+        condition: service_started
+      decision_service:
+        condition: service_started
+    networks:
+      - sdpd-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Forecasting ML Service
+  forecasting_service:
+    build:
+      context: ./ml-fastapi/forecasting_service
+      dockerfile: Dockerfile
+    container_name: sdpd-forecasting
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    networks:
+      - sdpd-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Routing ML Service
+  routing_service:
+    build:
+      context: ./ml-fastapi/routing_service
+      dockerfile: Dockerfile
+    container_name: sdpd-routing
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    networks:
+      - sdpd-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Decision ML Service
+  decision_service:
+    build:
+      context: ./ml-fastapi/decision_service
+      dockerfile: Dockerfile
+    container_name: sdpd-decision
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    networks:
+      - sdpd-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sdpd-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend-express
+    networks:
+      - sdpd-network
+
+networks:
+  sdpd-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+    driver: local

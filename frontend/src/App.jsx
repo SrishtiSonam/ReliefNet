@@ -1,34 +1,74 @@
-import React, { useState } from 'react';
-import Dashboard from './components/Dashboard';
-import MapView from './components/MapView';
-import ControlPanel from './components/ControlPanel';
-import AwarenessPortal from './components/AwarenessPortal';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import Dashboard from './pages/Dashboard';
+import DisasterPrediction from './pages/DisasterPrediction';
+import ResourceMap from './pages/ResourceMap';
+import DispatchRecommendation from './pages/DispatchRecommendation';
 
-function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-  const [simulationData, setSimulationData] = useState(null);
+function Navigation() {
+  const location = useLocation();
 
-  const handleSimulationUpdate = (data) => {
-    setSimulationData(data);
-  };
+  const navItems = [
+    { path: '/', label: 'Dashboard', icon: '📊' },
+    { path: '/prediction', label: 'Disaster Prediction', icon: '🌪️' },
+    { path: '/map', label: 'Resource Map', icon: '🗺️' },
+    { path: '/dispatch', label: 'Dispatch Decision', icon: '🚑' }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white font-sans">
-      <nav className="bg-gray-800 p-4 shadow-lg flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-blue-400">Disaster Relief AI</h1>
-        <div className="space-x-4">
-          <button onClick={() => setActiveTab('dashboard')} className={`px-4 py-2 rounded ${activeTab === 'dashboard' ? 'bg-blue-600' : 'bg-gray-700'}`}>Dashboard</button>
-          <button onClick={() => setActiveTab('map')} className={`px-4 py-2 rounded ${activeTab === 'map' ? 'bg-blue-600' : 'bg-gray-700'}`}>Live Map</button>
-          <button onClick={() => setActiveTab('portal')} className={`px-4 py-2 rounded ${activeTab === 'portal' ? 'bg-blue-600' : 'bg-gray-700'}`}>Awareness</button>
+    <nav className="bg-white shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex items-center">
+            <h1 className="text-xl font-bold text-primary-600">
+              🇮🇳 SDPD System
+            </h1>
+          </div>
+          <div className="flex space-x-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`inline-flex items-center px-4 py-2 text-sm font-medium transition-colors duration-200 ${location.pathname === item.path
+                    ? 'text-primary-600 border-b-2 border-primary-600'
+                    : 'text-gray-600 hover:text-primary-600'
+                  }`}
+              >
+                <span className="mr-2">{item.icon}</span>
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
-      </nav>
+      </div>
+    </nav>
+  );
+}
 
-      <main className="p-6">
-        {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab === 'map' && <div className="flex gap-4"><MapView simulationData={simulationData} /><ControlPanel onSimulationUpdate={handleSimulationUpdate} /></div>}
-        {activeTab === 'portal' && <AwarenessPortal />}
-      </main>
-    </div>
+function App() {
+  return (
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/prediction" element={<DisasterPrediction />} />
+            <Route path="/map" element={<ResourceMap />} />
+            <Route path="/dispatch" element={<DispatchRecommendation />} />
+          </Routes>
+        </main>
+        <footer className="bg-white border-t border-gray-200 mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <p className="text-center text-sm text-gray-500">
+              Smart Disaster Prediction, Decision & Resource Allocation System for India
+              <br />
+              <span className="text-xs">Design Reference: /mnt/data/RG14.docx.pdf</span>
+            </p>
+          </div>
+        </footer>
+      </div>
+    </Router>
   );
 }
 

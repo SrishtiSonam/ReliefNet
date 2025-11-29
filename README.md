@@ -1,125 +1,327 @@
-# Stochastic Dynamic Post-Disaster Inventory Allocation Platform
+# Smart Disaster Prediction, Decision & Resource Allocation System (SDPD)
 
-## 📌 Project Overview
-This is a full-stack AI-driven platform designed to optimize disaster relief allocation using a mixed fleet of **Trucks** and **UAVs (Drones)**. It integrates:
-- **AI Forecasting**: Predicting demand surges using ARIMA, GARCH, and Transformer models.
-- **Optimization**: Allocating resources using Mixed-Integer Programming (MIP) with OR-Tools.
-- **Simulation**: A dynamic environment simulating road failures, aftershocks, and battery constraints.
-- **Explainability**: SHAP values and RAG-based Q&A to explain AI decisions to human operators.
-- **Interactive Dashboard**: A React-based frontend for real-time monitoring and control.
+A comprehensive disaster management system for India using MERN stack + FastAPI microservices architecture.
 
----
+## 🏗️ Architecture
 
-## 🚀 Features
+- **Frontend**: React + Vite + Tailwind CSS
+- **Backend API Gateway**: Node.js + Express
+- **ML Microservices**: FastAPI (Python)
+  - Forecasting Service (Port 8001)
+  - Routing Service (Port 8002)
+  - Decision Service (Port 8003)
+- **Database**: MongoDB
+- **Orchestration**: Docker + Docker Compose
 
-### Backend (FastAPI + Python)
-- **Forecasting Engine**: Predicts relief demand based on historical data and real-time signals.
-- **Graph Neural Network (GNN)**: Embeds road network conditions to understand accessibility.
-- **ADP & VFA**: Approximate Dynamic Programming with Value Function Approximation for long-term planning.
-- **MIP Solver**: Optimizes immediate delivery schedules under capacity and time constraints.
-- **Simulation Engine**: Simulates the disaster environment, including random road closures and demand spikes.
+## 📋 Design Reference
 
-### Frontend (React + Tailwind)
-- **Live Map**: Visualizes districts, open/closed roads, and active vehicle routes.
-- **Dashboard**: Real-time KPIs for total demand, fulfilled orders, and active fleet status.
-- **Control Panel**: Manually trigger simulation steps, run optimization, or override decisions.
-- **Awareness Portal**: AI-powered safety assistant and educational resources.
+This system is based on the design document: `/mnt/data/RG14.docx.pdf`
 
----
-
-## 🛠️ Installation & Setup
+## 🚀 Quick Start
 
 ### Prerequisites
-- **Python 3.10+** (Note: Python 3.14 is currently too new for the `ortools` solver. Use 3.10 or 3.11 for full functionality).
-- **Node.js 18+** (For the frontend).
 
-### ⚡ Windows Quick Start (Recommended)
-We have provided a one-click setup script for Windows users.
+- Docker Desktop (Windows/Mac) or Docker Engine + Docker Compose (Linux)
+- Git
 
-1. **Open Terminal** (Command Prompt or PowerShell).
-2. **Navigate to the project folder**:
-   ```cmd
-   C:\Users\Srish\AppData\Local\Programs\Python\Python311\python.exe --version
-   C:\Users\Srish\AppData\Local\Programs\Python\Python311\python.exe -m venv venv
-   venv\Scripts\activate  
-   pip install -r requirements.txt
+### Running the Complete System
+
+1. **Clone the repository** (if applicable) or navigate to the project directory:
+   ```bash
+   cd C:\Users\Srish\Desktop\ReliefNet
    ```
 
-## 🏃‍♂️ How to Run the Project
+2. **Start all services with Docker Compose**:
+   ```bash
+   docker-compose up --build
+   ```
 
-Follow these steps in order to start the full system.
+3. **Access the application**:
+   - **Frontend**: http://localhost:3000
+   - **Backend API**: http://localhost:5000
+   - **Forecasting Service**: http://localhost:8001
+   - **Routing Service**: http://localhost:8002
+   - **Decision Service**: http://localhost:8003
+   - **MongoDB**: localhost:27017
 
-### Step 1: Generate Synthetic Data
-Before running the app, generate the test data (districts, roads, demand curves).
-*Make sure your virtual environment is activated!*
+4. **Stop all services**:
+   ```bash
+   docker-compose down
+   ```
 
-```cmd
-   venv\Scripts\activate 
-   python data/generator.py
+5. **Stop and remove volumes** (clears database):
+   ```bash
+   docker-compose down -v
+   ```
+
+## 🔧 Running Individual Services (Development)
+
+### Backend Express
+
+```bash
+cd backend-express
+npm install
+npm run dev
 ```
-*Output: CSV files will be created in `data/`.*
 
-### Step 2: Start the Backend API
-Keep the terminal open and run:
+### Forecasting Service
 
-```cmd
-   python backend/app.py
+```bash
+cd ml-fastapi/forecasting_service
+pip install -r requirements.txt
+python main.py
 ```
-*Success: You should see `Uvicorn running on http://0.0.0.0:8000`.*
 
-### Step 3: Start the Frontend Dashboard
-Open a **new** terminal window.
+### Routing Service
 
-```cmd
+```bash
+cd ml-fastapi/routing_service
+pip install -r requirements.txt
+python main.py
+```
+
+### Decision Service
+
+```bash
+cd ml-fastapi/decision_service
+pip install -r requirements.txt
+python main.py
+```
+
+### Frontend
+
+```bash
 cd frontend
 npm install
-npm start
+npm run dev
 ```
-*Success: The browser should open `http://localhost:3000` showing the dashboard.*
+
+## 📁 Project Structure
+
+```
+sdpd-ai/
+├── backend-express/          # Express API Gateway
+│   ├── src/
+│   │   ├── config.js
+│   │   ├── models/
+│   │   │   └── user.js
+│   │   └── routes/
+│   │       ├── auth.js
+│   │       ├── forecasting_proxy.js
+│   │       ├── routing_proxy.js
+│   │       └── decision_proxy.js
+│   ├── server.js
+│   ├── package.json
+│   └── Dockerfile
+├── ml-fastapi/               # ML Microservices
+│   ├── forecasting_service/
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── requirements.txt
+│   │   ├── model_placeholder.pkl
+│   │   └── Dockerfile
+│   ├── routing_service/
+│   │   ├── main.py
+│   │   ├── models.py
+│   │   ├── requirements.txt
+│   │   ├── distance_matrix_placeholder.csv
+│   │   └── Dockerfile
+│   └── decision_service/
+│       ├── main.py
+│       ├── models.py
+│       ├── requirements.txt
+│       ├── dispatch_model_placeholder.pkl
+│       └── Dockerfile
+├── frontend/                 # React Frontend
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── DisasterPrediction.jsx
+│   │   │   ├── ResourceMap.jsx
+│   │   │   └── DispatchRecommendation.jsx
+│   │   ├── services/
+│   │   │   └── api.js
+│   │   ├── styles/
+│   │   │   └── tailwind.css
+│   │   ├── App.jsx
+│   │   └── index.jsx
+│   ├── package.json
+│   ├── vite.config.js
+│   ├── tailwind.config.js
+│   └── Dockerfile
+├── docs/                     # Documentation
+│   ├── architecture.md
+│   ├── api_endpoints.md
+│   ├── integration_guide.md
+│   └── design_reference.md
+├── docker-compose.yml
+└── README.md
+```
+
+## 🔑 Key Features
+
+### 1. Dashboard
+- System health monitoring
+- Real-time statistics
+- Recent activity feed
+- Quick action buttons
+
+### 2. Disaster Prediction
+- Input disaster parameters (district, type, date, weather)
+- ML-powered demand forecasting
+- Resource requirement predictions (food, water, medical)
+- Severity assessment
+
+### 3. Resource Map
+- Interactive Leaflet map of India
+- District-wise resource visualization
+- Real-time resource availability
+- Severity indicators with color-coded circles
+
+### 4. Dispatch Recommendation
+- Intelligent dispatch decision system
+- Multi-factor analysis (severity, weather, traffic, distance)
+- Resource optimization
+- Confidence scoring
+- Alternative options
+
+## 🔐 Authentication
+
+The system includes JWT-based authentication:
+
+**Register a new user:**
+```bash
+curl -X POST http://localhost:5000/register \
+  -H "Content-Type: application/json" \
+  -d '{"username":"admin","email":"admin@sdpd.gov.in","password":"admin123"}'
+```
+
+**Login:**
+```bash
+curl -X POST http://localhost:5000/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@sdpd.gov.in","password":"admin123"}'
+```
+
+## 🧪 Testing the System
+
+### Test Forecasting Service
+```bash
+curl -X POST http://localhost:5000/api/forecast/demand \
+  -H "Content-Type: application/json" \
+  -d '{
+    "district": "Mumbai",
+    "disaster_type": "flood",
+    "date_features": {"month": 7, "season": "monsoon"},
+    "other_features": {"population": 12442373, "rainfall_mm": 250}
+  }'
+```
+
+### Test Routing Service
+```bash
+curl -X POST http://localhost:5000/api/routing/optimal-route \
+  -H "Content-Type: application/json" \
+  -d '{
+    "from_district": "Mumbai",
+    "to_district": "Pune",
+    "vehicle_type": "ambulance",
+    "constraints": {}
+  }'
+```
+
+### Test Decision Service
+```bash
+curl -X POST http://localhost:5000/api/decision/recommend \
+  -H "Content-Type: application/json" \
+  -d '{
+    "severity": "high",
+    "weather": "clear",
+    "traffic": "low",
+    "distance": 50,
+    "hospital_capacity": 80,
+    "ambulance_availability": 5,
+    "drone_availability": 2
+  }'
+```
+
+## 👥 Team Integration Guide
+
+See [docs/integration_guide.md](docs/integration_guide.md) for detailed instructions on:
+- Where to place your trained ML models
+- How to integrate custom algorithms
+- Data format requirements
+- Model loading examples
+
+## 📚 Documentation
+
+- **[Architecture](docs/architecture.md)**: System design and component overview
+- **[API Endpoints](docs/api_endpoints.md)**: Complete API reference with examples
+- **[Integration Guide](docs/integration_guide.md)**: How to integrate ML models and data
+- **[Design Reference](docs/design_reference.md)**: Link to original design document
+
+## 🐛 Troubleshooting
+
+### Services not starting
+```bash
+# Check logs
+docker-compose logs backend-express
+docker-compose logs forecasting_service
+
+# Rebuild specific service
+docker-compose up --build backend-express
+```
+
+### MongoDB connection issues
+```bash
+# Ensure MongoDB is healthy
+docker-compose ps
+
+# Check MongoDB logs
+docker-compose logs mongo
+```
+
+### Port conflicts
+If ports are already in use, modify the port mappings in `docker-compose.yml`:
+```yaml
+ports:
+  - "3001:3000"  # Change host port (left side)
+```
+
+## 🔄 Environment Variables
+
+Create `.env` files in each service directory for custom configuration:
+
+**backend-express/.env**:
+```env
+MONGO_URI=mongodb://mongo:27017/sdpd_db
+JWT_SECRET=your-secret-key
+PORT=5000
+```
+
+**frontend/.env**:
+```env
+VITE_API_URL=http://localhost:5000
+```
+
+## 📝 License
+
+MIT License - See LICENSE file for details
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📞 Support
+
+For issues and questions:
+- Check the [Integration Guide](docs/integration_guide.md)
+- Review [API Documentation](docs/api_endpoints.md)
+- Refer to design document: `/mnt/data/RG14.docx.pdf`
 
 ---
 
-## 🧪 Running Simulations
-
-### Standalone Simulation Demo
-If you want to run a quick simulation without the frontend:
-
-```cmd
-venv\Scripts\activate
-python backend/simulation/run_demo.py
-```
-This script will:
-1. Initialize the environment.
-2. Simulate 5 days of disaster relief.
-3. Print inventory levels, demand, and allocation decisions to the console.
-
----
-
-## 📂 Project Structure
-
-```
-├── backend/               # Python FastAPI Backend
-│   ├── app.py             # Main Entry Point
-│   ├── ml/                # AI Models (ARIMA, GNN, VFA)
-│   ├── solver/            # Optimization Logic (OR-Tools)
-│   ├── simulation/        # Environment Logic
-│   └── routes/            # API Endpoints
-├── frontend/              # React Frontend
-│   ├── src/components/    # Dashboard, Map, ControlPanel
-│   └── public/
-├── data/                  # Generated CSV Datasets
-├── notebooks/             # Jupyter Notebooks for Analysis
-└── requirements.txt       # Python Dependencies
-```
-
-## ⚠️ Troubleshooting
-
-- **"ModuleNotFoundError: No module named 'ortools'"**: 
-  - This means you are likely running Python 3.14 or a version not supported by OR-Tools yet. The app will still run, but the solver will return empty allocations. To fix, install Python 3.10 or 3.11 and recreate the virtual environment.
-  
-- **"npm is not recognized"**:
-  - Ensure Node.js is installed and added to your system PATH.
-
-- **Frontend can't connect to Backend**:
-  - Ensure the backend is running on port 8000. Check the console logs for errors.
-
+**Built with ❤️ for India's Disaster Management**
