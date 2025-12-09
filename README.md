@@ -1,327 +1,294 @@
-# Smart Disaster Prediction, Decision & Resource Allocation System (SDPD)
+# ReliefNet - Disaster Management Platform for India
 
-A comprehensive disaster management system for India using MERN stack + FastAPI microservices architecture.
+A comprehensive multi-role disaster management platform featuring real-time vehicle tracking, AI-powered resource allocation, and public relief services.
+
+## 🎯 Overview
+
+ReliefNet provides three specialized interfaces:
+
+1. **State Dashboard (SDMA)** - State-level disaster management and resource coordination
+2. **District Dashboard (DDMA)** - District-level operations and local response management
+3. **Public Portal** - Citizen services, relief requests, and safety information
 
 ## 🏗️ Architecture
 
-- **Frontend**: React + Vite + Tailwind CSS
-- **Backend API Gateway**: Node.js + Express
-- **ML Microservices**: FastAPI (Python)
-  - Forecasting Service (Port 8001)
-  - Routing Service (Port 8002)
-  - Decision Service (Port 8003)
-- **Database**: MongoDB
-- **Orchestration**: Docker + Docker Compose
+### Backend (FastAPI)
+- **Framework**: FastAPI with Python 3.8+
+- **Real-time Communication**: WebSocket for live vehicle tracking
+- **AI/ML**: Placeholder functions for forecasting, optimization, and explainable AI
+- **Data**: Mock datasets representing Indian districts, warehouses, and resources
 
-## 📋 Design Reference
+### Frontend (React)
+- **Framework**: React 18 with Vite
+- **Routing**: React Router v6
+- **Maps**: React-Leaflet with OpenStreetMap tiles
+- **Charts**: Recharts for data visualization
+- **Icons**: Lucide React
+- **Styling**: Vanilla CSS with modern design system
 
-This system is based on the design document: `/mnt/data/RG14.docx.pdf`
+## 📋 Features
 
-## 🚀 Quick Start
+### State Dashboard (SDMA)
+- ✅ Interactive India map with district boundaries
+- ✅ Real-time vehicle tracking (trucks, UAVs, ambulances)
+- ✅ Surge forecasting with 7-day predictions
+- ✅ Explainable AI (SHAP-style feature importance)
+- ✅ Resource allocation dashboard
+- ✅ Warehouse stock management
+- ✅ Live statistics and metrics
+
+### District Dashboard (DDMA)
+- ✅ District-level map with warehouses and roadblocks
+- ✅ Public request viewer and management
+- ✅ Roadblock reporting system
+- ✅ Local warehouse inventory
+- ✅ Mission planning interface
+- ✅ Real-time alerts
+
+### Public Portal
+- ✅ Shelter locator map
+- ✅ Relief request submission form
+- ✅ Visual request status tracker
+- ✅ Safety guidelines
+- ✅ Emergency contact numbers
+- ✅ Active disaster alerts
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Docker Desktop (Windows/Mac) or Docker Engine + Docker Compose (Linux)
-- Git
+- **Python**: 3.8 or higher
+- **Node.js**: 16.x or higher
+- **npm**: 8.x or higher
 
-### Running the Complete System
+### Installation
 
-1. **Clone the repository** (if applicable) or navigate to the project directory:
-   ```bash
-   cd C:\Users\Srish\Desktop\ReliefNet
-   ```
-
-2. **Start all services with Docker Compose**:
-   ```bash
-   docker-compose up --build
-   ```
-
-3. **Access the application**:
-   - **Frontend**: http://localhost:3000
-   - **Backend API**: http://localhost:5000
-   - **Forecasting Service**: http://localhost:8001
-   - **Routing Service**: http://localhost:8002
-   - **Decision Service**: http://localhost:8003
-   - **MongoDB**: localhost:27017
-
-4. **Stop all services**:
-   ```bash
-   docker-compose down
-   ```
-
-5. **Stop and remove volumes** (clears database):
-   ```bash
-   docker-compose down -v
-   ```
-
-## 🔧 Running Individual Services (Development)
-
-### Backend Express
+#### 1. Clone the Repository
 
 ```bash
-cd backend-express
-npm install
-npm run dev
+cd C:\Users\Srish\Desktop\ReliefNet
 ```
 
-### Forecasting Service
+#### 2. Backend Setup
 
 ```bash
-cd ml-fastapi/forecasting_service
+# Navigate to backend directory
+cd backend
+py -3.11 -m venv venv
+.\venv\Scripts\activate
+# Install Python dependencies
 pip install -r requirements.txt
+
+# Start the FastAPI server
 python main.py
 ```
 
-### Routing Service
+The backend will start on **http://localhost:8000**
+
+- API Documentation: http://localhost:8000/docs
+- WebSocket endpoint: ws://localhost:8000/ws/vehicles
+
+#### 3. Frontend Setup
+
+Open a new terminal:
 
 ```bash
-cd ml-fastapi/routing_service
-pip install -r requirements.txt
-python main.py
-```
-
-### Decision Service
-
-```bash
-cd ml-fastapi/decision_service
-pip install -r requirements.txt
-python main.py
-```
-
-### Frontend
-
-```bash
+# Navigate to frontend directory
 cd frontend
+
+# Install Node.js dependencies
 npm install
+
+# Start the development server
 npm run dev
 ```
+
+The frontend will start on **http://localhost:5173**
+
+## 📡 API Endpoints
+
+### Dashboard & Data
+- `GET /dashboard?role={state_admin|district_admin|public}` - Role-based dashboard data
+- `GET /districts_geo` - District boundaries as GeoJSON
+- `GET /vehicles` - Current vehicle positions
+- `GET /forecast?district={name}&days={n}` - Surge forecast
+
+### AI & Optimization
+- `POST /optimize_allocation` - Resource optimization
+- `GET /explain_allocation?district_id={id}` - Explainable AI insights
+
+### Public Services
+- `GET /public_requests` - List relief requests
+- `POST /public_requests` - Submit new request
+- `GET /roadblocks` - List roadblocks
+- `POST /roadblocks` - Report roadblock
+
+### Real-time
+- `WebSocket /ws/vehicles` - Live vehicle position updates
+
+## 🎨 Visual Components
+
+### Maps
+- Interactive OpenStreetMap integration
+- Color-coded risk zones (green → yellow → red)
+- Animated vehicle markers
+- District polygons with hover information
+- Route visualization
+
+### Charts
+- **Line Charts**: Surge forecasting trends
+- **Bar Charts**: Resource stock levels, feature importance
+- **Status Trackers**: Visual request progress timeline
+
+### Dashboards
+- Real-time statistics cards
+- Warehouse inventory displays
+- Vehicle status panels
+- Alert notifications
+
+## 🤖 AI/ML Placeholder Functions
+
+All AI functions are implemented as structured placeholders:
+
+1. **`forecast()`** - Generates mock surge predictions
+2. **`optimize_allocation()`** - Returns optimal resource distribution
+3. **`explain_allocation()`** - Provides SHAP-style explanations
+4. **`simulate_vehicle_movements()`** - Updates vehicle GPS coordinates
+5. **`validate_public_request()`** - Request validation logic
+
+## 📊 Mock Datasets
+
+The platform includes placeholder data for:
+
+- **Districts**: 8 major Indian cities with coordinates
+- **Warehouses**: Stock levels for food, water, medicine, blankets, tents
+- **Vehicles**: Trucks, UAVs, ambulances with real-time positions
+- **Shelters**: Capacity and facility information
+- **Public Requests**: Relief assistance requests
+- **Roadblocks**: Affected areas and severity levels
+
+## 🎯 Usage
+
+### 1. Start Both Servers
+
+Ensure both backend (port 8000) and frontend (port 5173) are running.
+
+### 2. Access the Application
+
+Open your browser and navigate to: **http://localhost:5173**
+
+### 3. Select Your Role
+
+Choose from three options:
+- **State Dashboard** - For state-level administrators
+- **District Dashboard** - For district-level officers
+- **Public Portal** - For citizens
+
+### 4. Explore Features
+
+- **State Dashboard**: View live vehicle tracking, check surge forecasts, analyze AI explanations
+- **District Dashboard**: Manage public requests, report roadblocks, monitor local warehouses
+- **Public Portal**: Submit relief requests, find shelters, view safety guidelines
+
+## 🔧 Configuration
+
+### Backend Configuration
+
+Edit `backend/main.py` to modify:
+- CORS origins
+- WebSocket update frequency
+- Mock data parameters
+
+### Frontend Configuration
+
+Edit `frontend/src/services/api.js` to change:
+- API base URL
+- WebSocket endpoint
 
 ## 📁 Project Structure
 
 ```
-sdpd-ai/
-├── backend-express/          # Express API Gateway
-│   ├── src/
-│   │   ├── config.js
-│   │   ├── models/
-│   │   │   └── user.js
-│   │   └── routes/
-│   │       ├── auth.js
-│   │       ├── forecasting_proxy.js
-│   │       ├── routing_proxy.js
-│   │       └── decision_proxy.js
-│   ├── server.js
-│   ├── package.json
-│   └── Dockerfile
-├── ml-fastapi/               # ML Microservices
-│   ├── forecasting_service/
-│   │   ├── main.py
-│   │   ├── models.py
-│   │   ├── requirements.txt
-│   │   ├── model_placeholder.pkl
-│   │   └── Dockerfile
-│   ├── routing_service/
-│   │   ├── main.py
-│   │   ├── models.py
-│   │   ├── requirements.txt
-│   │   ├── distance_matrix_placeholder.csv
-│   │   └── Dockerfile
-│   └── decision_service/
-│       ├── main.py
-│       ├── models.py
-│       ├── requirements.txt
-│       ├── dispatch_model_placeholder.pkl
-│       └── Dockerfile
-├── frontend/                 # React Frontend
-│   ├── src/
-│   │   ├── pages/
-│   │   │   ├── Dashboard.jsx
-│   │   │   ├── DisasterPrediction.jsx
-│   │   │   ├── ResourceMap.jsx
-│   │   │   └── DispatchRecommendation.jsx
-│   │   ├── services/
-│   │   │   └── api.js
-│   │   ├── styles/
-│   │   │   └── tailwind.css
-│   │   ├── App.jsx
-│   │   └── index.jsx
-│   ├── package.json
-│   ├── vite.config.js
-│   ├── tailwind.config.js
-│   └── Dockerfile
-├── docs/                     # Documentation
-│   ├── architecture.md
-│   ├── api_endpoints.md
-│   ├── integration_guide.md
-│   └── design_reference.md
-├── docker-compose.yml
-└── README.md
+ReliefNet/
+├── backend/
+│   ├── main.py                 # FastAPI application
+│   ├── models.py               # Pydantic models
+│   ├── ai_placeholders.py      # AI/ML functions
+│   ├── mock_data.py            # Mock datasets
+│   └── requirements.txt        # Python dependencies
+│
+└── frontend/
+    ├── src/
+    │   ├── components/         # Reusable components
+    │   │   ├── MapView.jsx
+    │   │   ├── SurgeChart.jsx
+    │   │   ├── ExplainableAI.jsx
+    │   │   ├── ResourceDashboard.jsx
+    │   │   ├── PublicRequestForm.jsx
+    │   │   └── RequestStatusTracker.jsx
+    │   ├── pages/              # Main pages
+    │   │   ├── Login.jsx
+    │   │   ├── StateDashboard.jsx
+    │   │   ├── DistrictDashboard.jsx
+    │   │   └── PublicPortal.jsx
+    │   ├── services/
+    │   │   └── api.js          # API service layer
+    │   ├── App.jsx             # Main app component
+    │   ├── main.jsx            # Entry point
+    │   └── index.css           # Global styles
+    ├── package.json
+    └── vite.config.js
 ```
 
-## 🔑 Key Features
+## 🎨 Design System
 
-### 1. Dashboard
-- System health monitoring
-- Real-time statistics
-- Recent activity feed
-- Quick action buttons
+The platform uses a modern dark theme with:
 
-### 2. Disaster Prediction
-- Input disaster parameters (district, type, date, weather)
-- ML-powered demand forecasting
-- Resource requirement predictions (food, water, medical)
-- Severity assessment
+- **Primary Color**: Blue (#2563eb)
+- **Success**: Green (#22c55e)
+- **Warning**: Orange (#f59e0b)
+- **Danger**: Red (#ef4444)
+- **Background**: Dark slate tones
+- **Typography**: System fonts with clear hierarchy
+- **Animations**: Smooth transitions and hover effects
 
-### 3. Resource Map
-- Interactive Leaflet map of India
-- District-wise resource visualization
-- Real-time resource availability
-- Severity indicators with color-coded circles
+## 🔮 Future Enhancements
 
-### 4. Dispatch Recommendation
-- Intelligent dispatch decision system
-- Multi-factor analysis (severity, weather, traffic, distance)
-- Resource optimization
-- Confidence scoring
-- Alternative options
+To productionize this platform:
 
-## 🔐 Authentication
+1. **Real AI/ML Models**
+   - Integrate actual forecasting models
+   - Implement real optimization algorithms
+   - Add genuine SHAP explanations
 
-The system includes JWT-based authentication:
+2. **Database Integration**
+   - PostgreSQL with PostGIS for geospatial data
+   - Redis for caching and real-time data
+   - MongoDB for flexible document storage
 
-**Register a new user:**
-```bash
-curl -X POST http://localhost:5000/register \
-  -H "Content-Type: application/json" \
-  -d '{"username":"admin","email":"admin@sdpd.gov.in","password":"admin123"}'
-```
+3. **Authentication**
+   - JWT-based authentication
+   - Role-based access control (RBAC)
+   - OAuth integration
 
-**Login:**
-```bash
-curl -X POST http://localhost:5000/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@sdpd.gov.in","password":"admin123"}'
-```
+4. **Real-time GPS**
+   - Integration with vehicle tracking systems
+   - Live route optimization
+   - ETA calculations
 
-## 🧪 Testing the System
-
-### Test Forecasting Service
-```bash
-curl -X POST http://localhost:5000/api/forecast/demand \
-  -H "Content-Type: application/json" \
-  -d '{
-    "district": "Mumbai",
-    "disaster_type": "flood",
-    "date_features": {"month": 7, "season": "monsoon"},
-    "other_features": {"population": 12442373, "rainfall_mm": 250}
-  }'
-```
-
-### Test Routing Service
-```bash
-curl -X POST http://localhost:5000/api/routing/optimal-route \
-  -H "Content-Type: application/json" \
-  -d '{
-    "from_district": "Mumbai",
-    "to_district": "Pune",
-    "vehicle_type": "ambulance",
-    "constraints": {}
-  }'
-```
-
-### Test Decision Service
-```bash
-curl -X POST http://localhost:5000/api/decision/recommend \
-  -H "Content-Type: application/json" \
-  -d '{
-    "severity": "high",
-    "weather": "clear",
-    "traffic": "low",
-    "distance": 50,
-    "hospital_capacity": 80,
-    "ambulance_availability": 5,
-    "drone_availability": 2
-  }'
-```
-
-## 👥 Team Integration Guide
-
-See [docs/integration_guide.md](docs/integration_guide.md) for detailed instructions on:
-- Where to place your trained ML models
-- How to integrate custom algorithms
-- Data format requirements
-- Model loading examples
-
-## 📚 Documentation
-
-- **[Architecture](docs/architecture.md)**: System design and component overview
-- **[API Endpoints](docs/api_endpoints.md)**: Complete API reference with examples
-- **[Integration Guide](docs/integration_guide.md)**: How to integrate ML models and data
-- **[Design Reference](docs/design_reference.md)**: Link to original design document
-
-## 🐛 Troubleshooting
-
-### Services not starting
-```bash
-# Check logs
-docker-compose logs backend-express
-docker-compose logs forecasting_service
-
-# Rebuild specific service
-docker-compose up --build backend-express
-```
-
-### MongoDB connection issues
-```bash
-# Ensure MongoDB is healthy
-docker-compose ps
-
-# Check MongoDB logs
-docker-compose logs mongo
-```
-
-### Port conflicts
-If ports are already in use, modify the port mappings in `docker-compose.yml`:
-```yaml
-ports:
-  - "3001:3000"  # Change host port (left side)
-```
-
-## 🔄 Environment Variables
-
-Create `.env` files in each service directory for custom configuration:
-
-**backend-express/.env**:
-```env
-MONGO_URI=mongodb://mongo:27017/sdpd_db
-JWT_SECRET=your-secret-key
-PORT=5000
-```
-
-**frontend/.env**:
-```env
-VITE_API_URL=http://localhost:5000
-```
+5. **Data Sources**
+   - India Meteorological Department (IMD) API
+   - ISRO satellite data
+   - Data.gov.in datasets
+   - OpenStreetMap extracts
 
 ## 📝 License
 
-MIT License - See LICENSE file for details
+This is a demonstration project for disaster management platform development.
 
-## 🤝 Contributing
+## 👥 Support
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## 📞 Support
-
-For issues and questions:
-- Check the [Integration Guide](docs/integration_guide.md)
-- Review [API Documentation](docs/api_endpoints.md)
-- Refer to design document: `/mnt/data/RG14.docx.pdf`
+For questions or issues, please refer to the API documentation at http://localhost:8000/docs when the backend is running.
 
 ---
 
-**Built with ❤️ for India's Disaster Management**
+**Built with ❤️ for disaster resilience in India**

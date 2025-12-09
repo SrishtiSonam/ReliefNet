@@ -1,64 +1,50 @@
 import axios from 'axios';
 
-// Create axios instance with base configuration
+const API_BASE_URL = 'http://localhost:8000';
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
-    timeout: 30000,
+    baseURL: API_BASE_URL,
     headers: {
-        'Content-Type': 'application/json'
-    }
+        'Content-Type': 'application/json',
+    },
 });
 
-// Request interceptor to add auth token if available
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
-// Response interceptor for error handling
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        if (error.response?.status === 401) {
-            // Unauthorized - clear token and redirect to login
-            localStorage.removeItem('token');
-            window.location.href = '/';
-        }
-        return Promise.reject(error);
-    }
-);
-
-// Authentication APIs
-export const authAPI = {
-    register: (userData) => api.post('/register', userData),
-    login: (credentials) => api.post('/login', credentials),
-    checkProtected: () => api.get('/protected')
+export const getDashboard = (role) => api.get(`/dashboard?role=${role}`);
+export const getForecast = (district, days = 7) => api.get(`/forecast?district=${district}&days=${days}`);
+export const optimizeAllocation = (data) => api.post('/optimize_allocation', data);
+export const getExplanation = (districtId) => api.get(`/explain_allocation?district_id=${districtId}`);
+export const getPublicRequests = (status = null) => {
+    const url = status ? `/public_requests?status=${status}` : '/public_requests';
+    return api.get(url);
 };
+export const createPublicRequest = (data) => api.post('/public_requests', data);
+export const getRoadblocks = () => api.get('/roadblocks');
+export const createRoadblock = (data) => api.post('/roadblocks', data);
+export const getVehicles = () => api.get('/vehicles');
+export const getDistrictsGeo = () => api.get('/districts_geo');
+export const planMission = (data) => api.post('/mission/plan', data);
 
-// Forecasting APIs
-export const forecastAPI = {
-    getDemandForecast: (data) => api.post('/api/forecast/demand', data)
+export const connectWebSocket = (onMessage) => {
+    const ws = new WebSocket('ws://localhost:8000/ws/vehicles');
+
+    ws.onopen = () => {
+        console.log('WebSocket connected');
+    };
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        onMessage(data);
+    };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+
+    ws.onclose = () => {
+        console.log('WebSocket disconnected');
+    };
+
+    return ws;
 };
-
-// Routing APIs
-export const routingAPI = {
-    getOptimalRoute: (data) => api.post('/api/routing/optimal-route', data)
-};
-
-// Decision APIs
-export const decisionAPI = {
-    getRecommendation: (data) => api.post('/api/decision/recommend', data)
-};
-
-// Health check
-export const healthCheck = () => api.get('/health');
 
 export default api;
