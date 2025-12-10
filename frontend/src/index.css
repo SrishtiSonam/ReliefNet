@@ -9,16 +9,16 @@
   --success: #22c55e;
   --info: #3b82f6;
   
-  /* Neutrals */
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
+  /* Neutrals - Light Theme */
+  --bg-primary: #f0f8ff; /* AliceBlue */
+  --bg-secondary: #ffffff; /* White */
+  --bg-tertiary: #f1f5f9; /* Light Gray */
+  --text-primary: #000000; /* Black */
+  --text-secondary: #4b5563; /* Dark Gray */
+  --text-muted: #6b7280; /* Muted Gray */
   
   /* Borders */
-  --border-color: #334155;
+  --border-color: #e5e7eb;
   --border-radius: 12px;
   --border-radius-sm: 8px;
   

@@ -1,108 +1,238 @@
-import { useNavigate } from 'react-router-dom';
-import { Shield, Building2, Users } from 'lucide-react';
+import { useState } from 'react';
+import { Shield, Mail, Lock, User } from 'lucide-react';
 
 const Login = () => {
-    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [role, setRole] = useState('');
 
-    const roles = [
-        {
-            id: 'state',
-            title: 'State Dashboard (SDMA)',
-            description: 'State-level disaster management and resource coordination',
-            icon: Shield,
-            color: '#2563eb',
-            path: '/state'
-        },
-        {
-            id: 'district',
-            title: 'District Dashboard (DDMA)',
-            description: 'District-level operations and local response management',
-            icon: Building2,
-            color: '#10b981',
-            path: '/district'
-        },
-        {
-            id: 'public',
-            title: 'Public Portal',
-            description: 'Citizen services, relief requests, and safety information',
-            icon: Users,
-            color: '#f59e0b',
-            path: '/public'
+    const handleLogin = () => {
+        if (!email || !password || !role) {
+            alert('Please fill all fields');
+            return;
         }
-    ];
+
+        // Navigate based on selected role
+        if (role === 'central') {
+            window.location.href = '/state';
+        } else if (role === 'state') {
+            window.location.href = '/district';
+        } else if (role === 'public') {
+            window.location.href = '/public';
+        }
+    };
 
     return (
-        <div className="page" style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
-        }}>
-            <div className="container" style={{ maxWidth: '1200px' }}>
-                <div className="text-center mb-3">
-                    <h1 style={{ fontSize: '3rem', marginBottom: '1rem' }}>
-                        <span style={{ color: '#2563eb' }}>Relief</span>Net
-                    </h1>
-                    <p style={{ fontSize: '1.25rem', color: '#cbd5e1' }}>
-                        Disaster Management Platform for India
-                    </p>
-                    <p className="text-muted">
-                        Select your role to access the appropriate dashboard
-                    </p>
-                </div>
+        <div style={{ minHeight: '100vh', background: '#f0f4f8' }}>
+            {/* Header Tricolor */}
+            <div style={{ background: 'linear-gradient(to right, #FF9933, #FFFFFF, #138808)', padding: '4px 0' }}></div>
 
-                <div className="grid grid-3 gap-3 mt-3">
-                    {roles.map(role => {
-                        const Icon = role.icon;
-                        return (
-                            <div
-                                key={role.id}
-                                className="card"
-                                style={{
-                                    cursor: 'pointer',
-                                    textAlign: 'center',
-                                    padding: '2rem',
-                                    transition: 'all 0.3s ease',
-                                    borderColor: 'transparent'
-                                }}
-                                onClick={() => navigate(role.path)}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.borderColor = role.color;
-                                    e.currentTarget.style.transform = 'translateY(-8px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = 'transparent';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                }}
-                            >
-                                <div style={{
-                                    width: '80px',
-                                    height: '80px',
-                                    margin: '0 auto 1.5rem',
-                                    borderRadius: '50%',
-                                    background: `${role.color}20`,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center'
-                                }}>
-                                    <Icon size={40} color={role.color} />
-                                </div>
-                                <h3 style={{ marginBottom: '0.75rem' }}>{role.title}</h3>
-                                <p className="text-muted">{role.description}</p>
-                                <button
-                                    className="btn btn-primary mt-2"
-                                    style={{ background: role.color }}
-                                >
-                                    Access Dashboard
-                                </button>
+            <div style={{ background: '#FFFFFF', borderBottom: '1px solid #e0e0e0', padding: '12px 0' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+                    <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/5/55/Emblem_of_India.svg"
+                        alt="Government of India"
+                        style={{ height: '60px' }}
+                    />
+                    <div>
+                        <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#1a1a1a', margin: '0', lineHeight: '1.2' }}>
+                            ReliefNet
+                        </h1>
+                        <p style={{ fontSize: '13px', color: '#666', margin: '4px 0 0 0' }}>
+                            राहत नेट | Disaster Management Platform
+                        </p>
+                        <p style={{ fontSize: '12px', color: '#888', margin: '2px 0 0 0' }}>
+                            Ministry of Home Affairs, Government of India
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div style={{ maxWidth: '1200px', margin: '40px auto', padding: '0 20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 450px', gap: '40px', alignItems: 'start' }}>
+
+                    {/* Left Side - Information */}
+                    <div>
+                        <div style={{ background: '#FFFFFF', border: '1px solid #ddd', borderRadius: '4px', padding: '30px', marginBottom: '20px' }}>
+                            <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1a1a1a', marginBottom: '16px', borderLeft: '4px solid #FF9933', paddingLeft: '16px' }}>
+                                National Disaster Management Portal
+                            </h2>
+                            <p style={{ fontSize: '14px', color: '#444', lineHeight: '1.7', marginBottom: '16px' }}>
+                                The ReliefNet platform is a comprehensive disaster management system designed to facilitate
+                                coordination between Central, State, and District authorities, as well as provide essential
+                                services to citizens during emergencies.
+                            </p>
+
+                            <div style={{ marginTop: '24px' }}>
+                                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#1a1a1a', marginBottom: '12px' }}>
+                                    Key Features:
+                                </h3>
+                                <ul style={{ fontSize: '14px', color: '#444', lineHeight: '1.8', paddingLeft: '20px' }}>
+                                    <li>Real-time disaster monitoring and alerts</li>
+                                    <li>Resource allocation and tracking</li>
+                                    <li>Relief camp management</li>
+                                    <li>Citizen services and SOS requests</li>
+                                    <li>Inter-agency coordination</li>
+                                </ul>
                             </div>
-                        );
-                    })}
-                </div>
+                        </div>
 
-                <div className="text-center mt-3">
-                    <p className="text-muted" style={{ fontSize: '0.875rem' }}>
-                        © 2024 ReliefNet - Disaster Management Platform
+                        <div style={{ background: '#FFF8E1', border: '1px solid #FFD54F', borderRadius: '4px', padding: '16px' }}>
+                            <p style={{ fontSize: '13px', color: '#5D4037', margin: 0, lineHeight: '1.6' }}>
+                                <strong>Notice:</strong> This is an official Government of India portal. Unauthorized access is prohibited
+                                and punishable under IT Act 2000.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Right Side - Login Form */}
+                    <div>
+                        <div style={{ background: '#FFFFFF', border: '2px solid #1976D2', borderRadius: '4px', overflow: 'hidden' }}>
+                            <div style={{ background: '#1976D2', padding: '20px', textAlign: 'center' }}>
+                                <Shield size={40} color="white" style={{ marginBottom: '8px' }} />
+                                <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'white', margin: '0' }}>
+                                    Secure Login
+                                </h2>
+                                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', margin: '8px 0 0 0' }}>
+                                    सुरक्षित लॉगिन | Access Your Dashboard
+                                </p>
+                            </div>
+
+                            <div style={{ padding: '30px' }}>
+                                <div style={{ marginBottom: '20px' }}>
+                                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                                        Email Address / ईमेल पता <span style={{ color: '#d32f2f' }}>*</span>
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <Mail size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} />
+                                        <input
+                                            type="email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            placeholder="Enter your email"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 12px 10px 40px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '2px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                transition: 'border-color 0.2s',
+                                                boxSizing: 'border-box'
+                                            }}
+                                            onFocus={(e) => e.target.style.borderColor = '#1976D2'}
+                                            onBlur={(e) => e.target.style.borderColor = '#ccc'}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '20px' }}>
+                                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                                        Password / पासवर्ड <span style={{ color: '#d32f2f' }}>*</span>
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <Lock size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} />
+                                        <input
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Enter your password"
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 12px 10px 40px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '2px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                transition: 'border-color 0.2s',
+                                                boxSizing: 'border-box'
+                                            }}
+                                            onFocus={(e) => e.target.style.borderColor = '#1976D2'}
+                                            onBlur={(e) => e.target.style.borderColor = '#ccc'}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div style={{ marginBottom: '24px' }}>
+                                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                                        User Role / उपयोगकर्ता भूमिका <span style={{ color: '#d32f2f' }}>*</span>
+                                    </label>
+                                    <div style={{ position: 'relative' }}>
+                                        <User size={18} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666', pointerEvents: 'none', zIndex: 1 }} />
+                                        <select
+                                            value={role}
+                                            onChange={(e) => setRole(e.target.value)}
+                                            style={{
+                                                width: '100%',
+                                                padding: '10px 12px 10px 40px',
+                                                border: '1px solid #ccc',
+                                                borderRadius: '2px',
+                                                fontSize: '14px',
+                                                outline: 'none',
+                                                transition: 'border-color 0.2s',
+                                                appearance: 'none',
+                                                background: 'white',
+                                                cursor: 'pointer',
+                                                boxSizing: 'border-box'
+                                            }}
+                                            onFocus={(e) => e.target.style.borderColor = '#1976D2'}
+                                            onBlur={(e) => e.target.style.borderColor = '#ccc'}
+                                        >
+                                            <option value="">Select your role</option>
+                                            <option value="central">Central Authority / केंद्रीय प्राधिकरण</option>
+                                            <option value="state">State Authority / राज्य प्राधिकरण</option>
+                                            <option value="public">Public User / नागरिक उपयोगकर्ता</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={handleLogin}
+                                    style={{
+                                        width: '100%',
+                                        padding: '12px',
+                                        background: '#FF9933',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '2px',
+                                        fontSize: '16px',
+                                        fontWeight: '700',
+                                        cursor: 'pointer',
+                                        transition: 'background 0.2s',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.5px'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f57c00'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = '#FF9933'}
+                                >
+                                    Login / लॉगिन करें
+                                </button>
+
+                                <div style={{ marginTop: '20px', padding: '12px', background: '#f5f5f5', borderRadius: '2px', fontSize: '12px', color: '#666', textAlign: 'center' }}>
+                                    For technical support, contact: <strong>support@reliefnet.gov.in</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '12px', color: '#666' }}>
+                            <p style={{ margin: '8px 0' }}>
+                                Designed, Developed and Hosted by<br />
+                                <strong>National Informatics Centre</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div style={{ background: '#1a1a1a', color: '#ccc', padding: '20px 0', marginTop: '60px' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', textAlign: 'center', fontSize: '13px' }}>
+                    <p style={{ margin: '0 0 8px 0' }}>
+                        © 2025 Ministry of Home Affairs, Government of India. All Rights Reserved.
+                    </p>
+                    <p style={{ margin: '0', fontSize: '12px' }}>
+                        Last Updated: December 10, 2025 | Version 2.0
                     </p>
                 </div>
             </div>

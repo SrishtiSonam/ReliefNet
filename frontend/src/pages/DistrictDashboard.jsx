@@ -137,7 +137,7 @@ const DistrictDashboard = () => {
                     <div className="card-body">
                         <MapView
                             center={district ? [district.lat, district.lng] : [20.5937, 78.9629]}
-                            zoom={10}
+                            zoom={12}
                             markers={[
                                 ...warehouses.map(w => ({
                                     lat: w.lat,
@@ -172,8 +172,8 @@ const DistrictDashboard = () => {
                                         <div className="flex justify-between items-center mb-1">
                                             <strong>{request.name}</strong>
                                             <span className={`badge badge-${request.status === 'completed' ? 'success' :
-                                                    request.status === 'in_progress' ? 'info' :
-                                                        request.status === 'approved' ? 'warning' : 'danger'
+                                                request.status === 'in_progress' ? 'info' :
+                                                    request.status === 'approved' ? 'warning' : 'danger'
                                                 }`}>
                                                 {request.status}
                                             </span>
@@ -200,7 +200,7 @@ const DistrictDashboard = () => {
                         Roadblocks & Affected Areas
                         <button
                             className="btn btn-primary btn-sm"
-                            style={{ marginLeft: 'auto', padding: '0.5rem 1rem' }}
+                            style={{ marginRight: '0px', padding: '0.5rem 1rem' }}
                             onClick={() => setShowRoadblockForm(!showRoadblockForm)}
                         >
                             Report Roadblock
@@ -250,7 +250,7 @@ const DistrictDashboard = () => {
                                     <div className="flex justify-between items-center mb-1">
                                         <strong>{roadblock.location}</strong>
                                         <span className={`badge badge-${roadblock.severity === 'high' ? 'danger' :
-                                                roadblock.severity === 'medium' ? 'warning' : 'info'
+                                            roadblock.severity === 'medium' ? 'warning' : 'info'
                                             }`}>
                                             {roadblock.severity}
                                         </span>

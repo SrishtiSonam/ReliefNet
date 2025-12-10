@@ -10,30 +10,34 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const MapView = ({ simulationData }) => {
+const MapView = ({ simulationData, center = [20.5937, 78.9629], zoom = 5, markers = [], vehicles = [], districts: propDistricts = [] }) => {
     const mapRef = useRef(null);
     const mapInstanceRef = useRef(null);
     const [districts, setDistricts] = useState([]);
     const [routes, setRoutes] = useState([]);
     const markersRef = useRef([]);
+    const vehicleMarkersRef = useRef([]);
+    const customMarkersRef = useRef([]);
 
-    // Load initial districts
+    // Load initial districts (Mock data for simulation mode)
     useEffect(() => {
-        const mockDistricts = [
-            { id: 0, name: 'District A', lat: 34.05, lon: -118.25, demand: 150, vulnerability: 0.8 },
-            { id: 1, name: 'District B', lat: 34.08, lon: -118.22, demand: 80, vulnerability: 0.5 },
-            { id: 2, name: 'District C', lat: 34.03, lon: -118.28, demand: 200, vulnerability: 0.9 },
-            { id: 3, name: 'District D', lat: 34.06, lon: -118.30, demand: 120, vulnerability: 0.6 },
-            { id: 4, name: 'District E', lat: 34.02, lon: -118.23, demand: 90, vulnerability: 0.4 },
-        ];
-        setDistricts(mockDistricts);
+        if (!simulationData && propDistricts.length === 0) {
+            const mockDistricts = [
+                { id: 0, name: 'New Delhi', lat: 28.6139, lon: 77.2090, demand: 150, vulnerability: 0.8 },
+                { id: 1, name: 'Mumbai', lat: 19.0760, lon: 72.8777, demand: 80, vulnerability: 0.5 },
+                { id: 2, name: 'Chennai', lat: 13.0827, lon: 80.2707, demand: 200, vulnerability: 0.9 },
+                { id: 3, name: 'Kolkata', lat: 22.5726, lon: 88.3639, demand: 120, vulnerability: 0.6 },
+                { id: 4, name: 'Bangalore', lat: 12.9716, lon: 77.5946, demand: 90, vulnerability: 0.4 },
+            ];
+            setDistricts(mockDistricts);
 
-        const mockRoutes = [
-            { from: [34.05, -118.25], to: [34.08, -118.22], type: 'truck', status: 'active' },
-            { from: [34.05, -118.25], to: [34.03, -118.28], type: 'uav', status: 'active' },
-        ];
-        setRoutes(mockRoutes);
-    }, []);
+            const mockRoutes = [
+                { from: [28.6139, 77.2090], to: [19.0760, 72.8777], type: 'truck', status: 'active' },
+                { from: [13.0827, 80.2707], to: [12.9716, 77.5946], type: 'uav', status: 'active' },
+            ];
+            setRoutes(mockRoutes);
+        }
+    }, [simulationData, propDistricts]);
 
     // Update districts when simulation data changes
     useEffect(() => {
@@ -46,11 +50,18 @@ const MapView = ({ simulationData }) => {
         }
     }, [simulationData]);
 
+    // Update map view when center or zoom changes
+    useEffect(() => {
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.setView(center, zoom);
+        }
+    }, [center, zoom]);
+
     useEffect(() => {
         if (!mapRef.current || mapInstanceRef.current) return;
 
-        // Initialize map
-        const map = L.map(mapRef.current).setView([34.05, -118.25], 12);
+        // Initialize map centered on provided center or India
+        const map = L.map(mapRef.current).setView(center, zoom);
         mapInstanceRef.current = map;
 
         // Add tile layer
@@ -59,15 +70,15 @@ const MapView = ({ simulationData }) => {
             maxZoom: 18,
         }).addTo(map);
 
-        // Add depot marker (central warehouse)
+        // Add depot marker (central warehouse) - Nagpur (Central India)
         const depotIcon = L.divIcon({
             className: 'custom-depot-icon',
             html: '<div style="background: #3b82f6; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white;">🏭</div>',
             iconSize: [30, 30],
         });
-        L.marker([34.05, -118.25], { icon: depotIcon })
+        L.marker([21.1458, 79.0882], { icon: depotIcon })
             .addTo(map)
-            .bindPopup('<b>Central Depot</b><br>Main Supply Hub');
+            .bindPopup('<b>Central Depot (Nagpur)</b><br>Main Supply Hub');
 
         return () => {
             if (mapInstanceRef.current) {
@@ -77,7 +88,7 @@ const MapView = ({ simulationData }) => {
         };
     }, []);
 
-    // Update districts on map
+    // Update districts on map (Simulation Mode)
     useEffect(() => {
         if (!mapInstanceRef.current || districts.length === 0) return;
 
@@ -111,6 +122,49 @@ const MapView = ({ simulationData }) => {
             markersRef.current.push(marker);
         });
     }, [districts]);
+
+    // Render Custom Markers (from props)
+    useEffect(() => {
+        if (!mapInstanceRef.current) return;
+        const map = mapInstanceRef.current;
+
+        // Clear old custom markers
+        customMarkersRef.current.forEach(marker => map.removeLayer(marker));
+        customMarkersRef.current = [];
+
+        markers.forEach(markerData => {
+            const marker = L.marker([markerData.lat, markerData.lng])
+                .addTo(map)
+                .bindPopup(`<b>${markerData.name}</b><br>${markerData.description}`);
+            customMarkersRef.current.push(marker);
+        });
+    }, [markers]);
+
+    // Render Vehicles (from props)
+    useEffect(() => {
+        if (!mapInstanceRef.current) return;
+        const map = mapInstanceRef.current;
+
+        // Clear old vehicle markers
+        vehicleMarkersRef.current.forEach(marker => map.removeLayer(marker));
+        vehicleMarkersRef.current = [];
+
+        vehicles.forEach(vehicle => {
+            const color = vehicle.type === 'truck' ? '#3b82f6' : '#10b981';
+            const iconHtml = vehicle.type === 'truck' ? '🚛' : '🚁';
+
+            const vehicleIcon = L.divIcon({
+                className: 'vehicle-icon',
+                html: `<div style="background: ${color}; width: 30px; height: 30px; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-size: 16px;">${iconHtml}</div>`,
+                iconSize: [30, 30],
+            });
+
+            const marker = L.marker([vehicle.lat, vehicle.lng], { icon: vehicleIcon })
+                .addTo(map)
+                .bindPopup(`<b>${vehicle.name}</b><br>Type: ${vehicle.type}<br>Status: ${vehicle.status}`);
+            vehicleMarkersRef.current.push(marker);
+        });
+    }, [vehicles]);
 
     // Update routes on map
     useEffect(() => {

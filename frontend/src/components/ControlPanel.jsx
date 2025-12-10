@@ -71,7 +71,7 @@ const ControlPanel = ({ onSimulationUpdate }) => {
     const emergencyOverride = () => {
         setEmergencyMode(!emergencyMode);
         if (!emergencyMode) {
-            setLogs(prev => [...prev, "🚨 EMERGENCY OVERRIDE ACTIVATED"]);
+            setLogs(prev => [...prev, "⚠ EMERGENCY OVERRIDE ACTIVATED"]);
             setLogs(prev => [...prev, "Manual control enabled"]);
             setLogs(prev => [...prev, "All automated allocations paused"]);
             setLogs(prev => [...prev, "Use the form below to manually allocate resources"]);
