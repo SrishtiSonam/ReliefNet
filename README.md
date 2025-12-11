@@ -486,6 +486,7 @@ This creates:
 py -3.11 -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
+python init_backend.py
 ```
 
 **Key Dependencies**:
