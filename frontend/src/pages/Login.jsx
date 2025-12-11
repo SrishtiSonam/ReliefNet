@@ -69,10 +69,10 @@ const Login = () => {
                                     Key Features:
                                 </h3>
                                 <ul style={{ fontSize: '14px', color: '#444', lineHeight: '1.8', paddingLeft: '20px' }}>
-                                    <li>Real-time disaster monitoring and alerts</li>
+                                    <li>Disaster monitoring and alerts</li>
                                     <li>Resource allocation and tracking</li>
                                     <li>Relief camp management</li>
-                                    <li>Citizen services and SOS requests</li>
+                                    <li>Citizen services and requests</li>
                                     <li>Inter-agency coordination</li>
                                 </ul>
                             </div>
@@ -80,8 +80,7 @@ const Login = () => {
 
                         <div style={{ background: '#FFF8E1', border: '1px solid #FFD54F', borderRadius: '4px', padding: '16px' }}>
                             <p style={{ fontSize: '13px', color: '#5D4037', margin: 0, lineHeight: '1.6' }}>
-                                <strong>Notice:</strong> This is an official Government of India portal. Unauthorized access is prohibited
-                                and punishable under IT Act 2000.
+                                <strong>Notice:</strong> This is a dummy of Government of India portal. Using for education purpose only.
                             </p>
                         </div>
                     </div>
@@ -218,7 +217,7 @@ const Login = () => {
                         <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '12px', color: '#666' }}>
                             <p style={{ margin: '8px 0' }}>
                                 Designed, Developed and Hosted by<br />
-                                <strong>National Informatics Centre</strong>
+                                <strong> RG14 </strong>
                             </p>
                         </div>
                     </div>
@@ -229,10 +228,10 @@ const Login = () => {
             <div style={{ background: '#1a1a1a', color: '#ccc', padding: '20px 0', marginTop: '60px' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', textAlign: 'center', fontSize: '13px' }}>
                     <p style={{ margin: '0 0 8px 0' }}>
-                        © 2025 Ministry of Home Affairs, Government of India. All Rights Reserved.
+                        © 2025 | All Rights Reserved.
                     </p>
                     <p style={{ margin: '0', fontSize: '12px' }}>
-                        Last Updated: December 10, 2025 | Version 2.0
+                        Last Updated: December 11, 2025 | Version 2.0
                     </p>
                 </div>
             </div>
