@@ -14,11 +14,11 @@ const Login = () => {
 
         // Navigate based on selected role
         if (role === 'central') {
-            window.location.href = '/state';
+            window.location.href = '/state-dashboard';
         } else if (role === 'state') {
-            window.location.href = '/district';
+            window.location.href = '/district-dashboard';
         } else if (role === 'public') {
-            window.location.href = '/public';
+            window.location.href = '/public-portal';
         }
     };
 

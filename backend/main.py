@@ -31,6 +31,15 @@ from adp import solve_allocation_problem, create_initial_state
 from optimization import optimize_delivery_plan, recalculate_with_constraints
 from explainability import explain_allocation_decision, explain_with_tree
 
+# Import database and mock ML logic
+from database.db_manager import get_db
+from mock_ml_logic import (
+    ensemble_forecast as mock_ensemble_forecast,
+    allocate_resources,
+    generate_shap_explanation,
+    calculate_vfa_score
+)
+
 app = FastAPI(
     title="ReliefNet ML-Powered API",
     description="Disaster management with real AI/ML",
@@ -137,18 +146,19 @@ async def get_dashboard(role: UserRole = Query(...)):
 
 @app.get("/api/forecast")
 async def get_forecast(district: str = Query("Mumbai"), days: int = Query(7)):
-    """Real ML-powered forecast using ensemble"""
+    """
+    EDUCATIONAL DEMO: Mock ML Forecasting Endpoint
+    
+    HOW IT WORKS:
+    1. Uses ARIMA + GARCH ensemble to predict demand
+    2. Returns 7-day forecast with confidence intervals
+    3. Shows how forecasting affects allocation decisions
+    
+    This demonstrates the ML forecasting pipeline!
+    """
     try:
-        # Load historical data
-        demand_history = loader.load_demand_history()
-        
-        # Import ensemble forecaster
-        sys.path.append(str(Path(__file__).parent.parent / "ml-fastapi" / "forecasting_service" / "models"))
-        from ensemble import ensemble_forecast
-        
-        # Generate forecast
-        forecast_result = ensemble_forecast(demand_history, region=district, forecast_days=days)
-        
+        # Use mock ensemble forecast (educational demonstration)
+        forecast_result = mock_ensemble_forecast(district, days)
         return forecast_result
         
     except Exception as e:
@@ -277,6 +287,208 @@ async def get_vfa_value(state_dict: Dict[str, Any] = Body(...)):
     except Exception as e:
         return {'error': str(e)}
 
+# ==================== NEW DEMO ENDPOINTS ====================
+
+@app.post("/api/allocate/simulate")
+async def simulate_allocation(request: Dict[str, Any] = Body(...)):
+    """
+    EDUCATIONAL DEMO: Allocation Simulation
+    
+    HOW IT WORKS:
+    1. Takes district demands and available stock
+    2. Calculates priority scores for each district
+    3. Allocates resources based on priority
+    4. Selects vehicles (trucks vs UAVs) based on conditions
+    5. Returns allocation plan with VFA scores
+    
+    This shows the complete allocation engine logic!
+    """
+    try:
+        districts = request.get('districts', [])
+        available_stock = request.get('available_stock', {'food': 50000, 'water': 100000, 'medical': 10000})
+        
+        # Run allocation algorithm
+        allocations = allocate_resources(districts, available_stock)
+        
+        # Store in database for history
+        db = get_db()
+        for alloc in allocations:
+            db.add_allocation_record(alloc)
+        
+        return {
+            'success': True,
+            'allocations': allocations,
+            'timestamp': datetime.now().isoformat()
+        }
+    except Exception as e:
+        print(f"Allocation error: {e}")
+        return {'success': False, 'error': str(e)}
+
+@app.post("/api/explain/shap")
+async def get_shap_explanation_for_allocation(allocation: Dict[str, Any] = Body(...)):
+    """
+    EDUCATIONAL DEMO: SHAP Explainability
+    
+    HOW IT WORKS:
+    1. Takes an allocation decision
+    2. Calculates SHAP values (feature importance)
+    3. Generates natural language explanation
+    4. Shows why the model made this decision
+    
+    Makes AI transparent and trustworthy!
+    """
+    try:
+        explanation = generate_shap_explanation(allocation)
+        return explanation
+    except Exception as e:
+        return {'error': str(e)}
+
+@app.post("/api/public/request")
+async def submit_public_request(request_data: Dict[str, Any] = Body(...)):
+    """
+    EDUCATIONAL DEMO: Public Request Submission
+    
+    Saves citizen relief requests to database
+    Shows how user inputs flow through the system
+    """
+    try:
+        db = get_db()
+        request_id = db.add_public_request(request_data)
+        
+        return {
+            'success': True,
+            'request_id': request_id,
+            'message': 'Request submitted successfully',
+            'status': 'pending'
+        }
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+@app.get("/api/public/requests")
+async def get_public_requests_list(status: Optional[str] = None, district: Optional[str] = None):
+    """Get public requests from database"""
+    try:
+        db = get_db()
+        requests = db.get_public_requests(status=status, district=district)
+        return {'success': True, 'requests': requests}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+@app.post("/api/district/blockage")
+async def report_road_blockage(blockage_data: Dict[str, Any] = Body(...)):
+    """
+    EDUCATIONAL DEMO: Road Blockage Reporting
+    
+    Shows how road blockages affect routing decisions
+    Demonstrates dynamic re-allocation
+    """
+    try:
+        db = get_db()
+        blockage_id = db.add_road_blockage(blockage_data)
+        
+        return {
+            'success': True,
+            'blockage_id': blockage_id,
+            'message': 'Blockage reported successfully'
+        }
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+@app.get("/api/district/blockages")
+async def get_road_blockages_list(district: Optional[str] = None):
+    """Get road blockages from database"""
+    try:
+        db = get_db()
+        blockages = db.get_road_blockages(district=district)
+        return {'success': True, 'blockages': blockages}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+@app.post("/api/district/stock")
+async def update_stock(stock_data: Dict[str, Any] = Body(...)):
+    """
+    EDUCATIONAL DEMO: Warehouse Stock Update
+    
+    Shows how stock changes affect allocation decisions
+    Demonstrates real-time inventory management
+    """
+    try:
+        db = get_db()
+        warehouse_id = stock_data.get('warehouse_id')
+        updates = stock_data.get('updates', {})
+        
+        success = db.update_warehouse_stock(warehouse_id, updates)
+        
+        return {
+            'success': success,
+            'message': 'Stock updated successfully' if success else 'Update failed'
+        }
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+@app.get("/api/warehouse/stock")
+async def get_warehouse_stock_list(district: Optional[str] = None):
+    """Get warehouse stock levels"""
+    try:
+        db = get_db()
+        stock = db.get_warehouse_stock(district=district)
+        return {'success': True, 'warehouses': stock}
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+@app.post("/api/rerun")
+async def rerun_allocation(request: Dict[str, Any] = Body(...)):
+    """
+    EDUCATIONAL DEMO: Re-run Allocation
+    
+    HOW IT WORKS:
+    1. Gets updated data (blockages, stock, new requests)
+    2. Re-calculates allocation with new constraints
+    3. Shows how system adapts to changes
+    
+    Demonstrates dynamic decision-making!
+    """
+    try:
+        # Get updated data from database
+        db = get_db()
+        
+        district = request.get('district')
+        blockages = db.get_road_blockages(district=district)
+        stock = db.get_warehouse_stock(district=district)
+        requests = db.get_public_requests(district=district, status='pending')
+        
+        # Prepare districts with updated data
+        districts = request.get('districts', [])
+        
+        # Update accessibility based on blockages
+        for dist in districts:
+            if dist['name'] == district:
+                # Reduce accessibility if there are blockages
+                critical_blockages = [b for b in blockages if b['severity'] == 'critical']
+                if critical_blockages:
+                    dist['accessibility'] = max(0.2, dist.get('accessibility', 0.8) - 0.3)
+                    dist['road_blocked'] = True
+        
+        # Calculate available stock
+        available_stock = {}
+        for warehouse in stock:
+            available_stock['food'] = warehouse.get('food_kg', 0)
+            available_stock['water'] = warehouse.get('water_liters', 0)
+            available_stock['medical'] = warehouse.get('medical_units', 0)
+        
+        # Run allocation
+        allocations = allocate_resources(districts, available_stock)
+        
+        return {
+            'success': True,
+            'allocations': allocations,
+            'blockages_considered': len(blockages),
+            'requests_pending': len(requests),
+            'message': 'Allocation re-run with updated data'
+        }
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
 # Keep existing endpoints
 @app.get("/public_requests", response_model=List[PublicRequest])
 async def list_public_requests(status: Optional[RequestStatus] = None, limit: int = Query(50)):
@@ -305,6 +517,7 @@ async def list_vehicles():
 @app.get("/districts_geo")
 async def get_districts_geojson():
     return get_district_geojson()
+
 
 @app.websocket("/ws/vehicles")
 async def websocket_vehicles(websocket: WebSocket):
