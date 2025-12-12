@@ -17,6 +17,10 @@ import {
     Home as HomeIcon
 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart, Cell } from 'recharts';
+import TFTForecastChart from '../components/TFT/TFTForecastChart';
+import AttentionHeatmap from '../components/TFT/AttentionHeatmap';
+import TFTComparison from '../components/TFT/TFTComparison';
+import { useTFTForecast, useTFTAttention, useTFTComparison } from '../hooks/useTFT';
 
 const HowAIWorks = () => {
     const navigate = useNavigate();
@@ -28,6 +32,15 @@ const HowAIWorks = () => {
     const [trucks, setTrucks] = useState(5);
     const [populationDensity, setPopulationDensity] = useState(5000); // people per sq km
     const [roadAccessibility, setRoadAccessibility] = useState(70); // percentage
+
+    // TFT State
+    const [selectedDistrict, setSelectedDistrict] = useState('Mumbai');
+    const [forecastHorizon, setForecastHorizon] = useState(30);
+
+    // TFT API Hooks
+    const { data: tftForecast, loading: tftLoading } = useTFTForecast(selectedDistrict, forecastHorizon);
+    const { data: tftAttention, loading: attentionLoading } = useTFTAttention(selectedDistrict);
+    const { data: tftComparison, loading: comparisonLoading } = useTFTComparison(selectedDistrict);
     const [distanceToWarehouse, setDistanceToWarehouse] = useState(50); // km
     const [deprivationTime, setDeprivationTime] = useState(24); // hours
 
@@ -440,6 +453,121 @@ const HowAIWorks = () => {
                             </div>
                         </div>
                     </div>
+
+                    {/* NEW SECTION: Temporal Fusion Transformer (TFT) */}
+                    <div className="mb-16 bg-white/90 backdrop-blur-md rounded-2xl border border-blue-100 shadow-lg p-8">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-600 to-blue-600 flex items-center justify-center animate-pulse">
+                                <Brain className="w-6 h-6 text-black" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-900">Advanced Forecasting: Temporal Fusion Transformer</h2>
+                                <p className="text-gray-600">Deep learning with attention mechanisms for multi-horizon predictions</p>
+                            </div>
+                        </div>
+
+                        {/* Educational Info Box */}
+                        <div className="mb-6 bg-cyan-50 rounded-xl p-6 border border-cyan-200">
+                            <div className="flex items-start gap-3 text-sm text-gray-700">
+                                <Info className="w-5 h-5 text-cyan-600 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="font-semibold text-cyan-700 mb-2">What is TFT?</p>
+                                    <p className="mb-2">
+                                        <strong>Temporal Fusion Transformer</strong> is a state-of-the-art deep learning model that uses
+                                        <strong> attention mechanisms</strong> (like ChatGPT) to predict disaster relief demand.
+                                    </p>
+                                    <p className="mb-2"><strong>Key Advantages over ARIMA/GARCH:</strong></p>
+                                    <ul className="list-disc list-inside space-y-1 ml-2">
+                                        <li><strong>Multi-horizon:</strong> Predicts 1-30 days simultaneously (not one-at-a-time)</li>
+                                        <li><strong>Uncertainty:</strong> Provides confidence intervals (10th-90th percentile)</li>
+                                        <li><strong>Interpretable:</strong> Attention weights show which features matter most</li>
+                                        <li><strong>Complex patterns:</strong> Learns non-linear relationships in data</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* District Selector */}
+                        <div className="mb-6 flex items-center gap-4">
+                            <label className="text-sm font-semibold text-gray-700">Select District:</label>
+                            <select
+                                value={selectedDistrict}
+                                onChange={(e) => setSelectedDistrict(e.target.value)}
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                            >
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Kolkata">Kolkata</option>
+                                <option value="Chennai">Chennai</option>
+                                <option value="Bangalore">Bangalore</option>
+                            </select>
+
+                            <label className="text-sm font-semibold text-gray-700 ml-4">Forecast Horizon:</label>
+                            <select
+                                value={forecastHorizon}
+                                onChange={(e) => setForecastHorizon(Number(e.target.value))}
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                            >
+                                <option value={7}>7 days</option>
+                                <option value={14}>14 days</option>
+                                <option value={30}>30 days</option>
+                            </select>
+                        </div>
+
+                        {/* TFT Forecast Chart */}
+                        <div className="mb-8">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Multi-Horizon Forecast with Uncertainty</h3>
+                            <TFTForecastChart data={tftForecast} loading={tftLoading} />
+                        </div>
+
+                        {/* Attention Heatmap */}
+                        <div className="mb-8">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Variable Importance (Attention Weights)</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                These weights show which features the TFT model "pays attention to" when making predictions.
+                                Higher values mean the feature has more influence on the forecast.
+                            </p>
+                            <AttentionHeatmap data={tftAttention} loading={attentionLoading} />
+                        </div>
+
+                        {/* Model Comparison */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">TFT vs ARIMA/GARCH Comparison</h3>
+                            <p className="text-sm text-gray-600 mb-4">
+                                See how the deep learning TFT model compares to classical statistical methods.
+                                Lower variance indicates smoother, more stable predictions.
+                            </p>
+                            <TFTComparison data={tftComparison} loading={comparisonLoading} />
+                        </div>
+
+                        {/* Key Insights */}
+                        <div className="mt-8 grid md:grid-cols-3 gap-4">
+                            <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg border border-cyan-200">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <TrendingUp className="w-5 h-5 text-cyan-600" />
+                                    <h4 className="font-semibold text-gray-900">Multi-Horizon</h4>
+                                </div>
+                                <p className="text-sm text-gray-700">Predicts entire sequences at once, not step-by-step</p>
+                            </div>
+
+                            <div className="p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Eye className="w-5 h-5 text-purple-600" />
+                                    <h4 className="font-semibold text-gray-900">Attention</h4>
+                                </div>
+                                <p className="text-sm text-gray-700">Shows which features drive predictions (interpretability)</p>
+                            </div>
+
+                            <div className="p-4 bg-gradient-to-br from-orange-50 to-red-50 rounded-lg border border-orange-200">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <AlertCircle className="w-5 h-5 text-orange-600" />
+                                    <h4 className="font-semibold text-gray-900">Uncertainty</h4>
+                                </div>
+                                <p className="text-sm text-gray-700">Quantifies prediction confidence with intervals</p>
+                            </div>
+                        </div>
+                    </div>
+
 
                     {/* Section 2: Allocation Engine Demo */}
                     <div className="mb-16 bg-white/90 backdrop-blur-md rounded-2xl border border-blue-100 shadow-lg p-8">

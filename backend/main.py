@@ -10,6 +10,7 @@ import json
 from datetime import datetime
 import sys
 from pathlib import Path
+import numpy as np
 
 # Add backend to path
 sys.path.append(str(Path(__file__).parent))
@@ -538,11 +539,124 @@ async def websocket_vehicles(websocket: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
+# ============================================================================
+# TFT (Temporal Fusion Transformer) Endpoints
+# ============================================================================
+
+# Global TFT model instance (loaded on startup)
+tft_model = None
+tft_training_data = None
+
+@app.post("/api/tft/forecast")
+async def tft_forecast(
+    district: str = Body(...),
+    forecast_horizon: int = Body(30)
+):
+    """
+    Generate TFT-based forecast for a specific district.
+    
+    Returns multi-horizon predictions with uncertainty intervals.
+    """
+    try:
+        if tft_model is None:
+            return {"error": "TFT model not loaded"}
+        
+        # Make prediction
+        result = tft_model.predict(district=district, forecast_horizon=forecast_horizon)
+        
+        return {
+            "district": district,
+            "forecast_horizon": forecast_horizon,
+            "predictions": result['predictions'].tolist(),
+            "quantiles": {
+                "q10": result['quantiles']['q10'].tolist(),
+                "q50": result['quantiles']['q50'].tolist(),
+                "q90": result['quantiles']['q90'].tolist(),
+            },
+            "model": result['model'],
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {"error": str(e), "message": "TFT prediction failed"}
+
+@app.get("/api/tft/attention")
+async def tft_attention(district: str = Query("Mumbai")):
+    """
+    Get attention weights from TFT model for interpretability.
+    
+    Shows which features the model focuses on for predictions.
+    """
+    try:
+        if tft_model is None:
+            return {"error": "TFT model not loaded"}
+        
+        result = tft_model.predict(district=district, forecast_horizon=7)
+        attention = result['attention']
+        
+        # Format for heatmap visualization
+        features = attention['features']
+        temporal_attention = attention['temporal_attention']
+        
+        heatmap_data = []
+        for feature in features:
+            weight = attention['variable_attention'].get(feature, 0)
+            heatmap_data.append({
+                "feature": feature,
+                "importance": weight,
+                "temporal_pattern": temporal_attention
+            })
+        
+        return {
+            "district": district,
+            "variable_attention": attention['variable_attention'],
+            "temporal_attention": temporal_attention,
+            "heatmap_data": heatmap_data,
+            "interpretation": "Higher values indicate features the model focuses on more for predictions",
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
+@app.get("/api/tft/compare")
+async def tft_compare(district: str = Query("Mumbai")):
+    """
+    Compare TFT predictions with ARIMA/GARCH baseline.
+    
+    Shows the advantage of deep learning over classical methods.
+    """
+    try:
+        if tft_model is None:
+            return {"error": "TFT model not loaded"}
+        
+        # Get comparison from mock TFT
+        comparison = tft_model.compare_with_arima(district=district, days=7)
+        
+        return {
+            "district": district,
+            "comparison": comparison,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 @app.on_event("startup")
 async def startup_event():
+    global tft_model, tft_training_data
+    
     print("🚀 ReliefNet ML-Powered API started")
     print("📍 API Documentation: http://localhost:8000/docs")
     print("🤖 ML Models: Active")
+    
+    # Load Mock TFT (always available)
+    try:
+        from ml_models.mock_tft import MockTFTForecaster
+        tft_model = MockTFTForecaster()
+        print("✅ TFT model loaded (Mock for educational demo)")
+        print("   - Multi-horizon forecasting: ✓")
+        print("   - Attention mechanisms: ✓")
+        print("   - Uncertainty quantification: ✓")
+    except Exception as e:
+        print(f"⚠️  Could not load TFT model: {e}")
 
 if __name__ == "__main__":
     import uvicorn
