@@ -1,7 +1,5 @@
-"""
-Feature engineering for VFA state representation
-Extracts features from current state for value function approximation
-"""
+# Feature extraction for the VFA models
+# Takes the current state and converts it into a 20-dimensional feature vector
 import numpy as np
 import pandas as pd
 from typing import Dict, List, Any
@@ -9,46 +7,23 @@ from typing import Dict, List, Any
 
 def extract_state_features(state: Dict[str, Any]) -> np.ndarray:
     """
-    Extract feature vector from state for VFA input
+    Converts a state dict into a feature vector for the neural network.
     
-    State includes:
-    - Warehouse inventory levels
-    - Current demand
-    - Time information
-    - Risk scores
-    - Vehicle availability
-    
-    Returns:
-        Feature vector of shape (20,)
+    We normalize everything to [0, 1] range so the network trains better.
+    Total of 20 features covering inventory, demand, time, risk, etc.
     """
     features = []
     
-    # Inventory features (normalized by capacity)
+    # Inventory levels (5 features)
+    # Normalized by typical max capacity
     inventory = state.get('inventory', {})
-    features.append(inventory.get('food_kg', 0) / 10000)  # Normalize by 10k kg
-    features.append(inventory.get('water_liters', 0) / 20000)
+    features.append(inventory.get('food_kg', 0) / 10000)  # Max ~10k kg
+    features.append(inventory.get('water_liters', 0) / 20000)  # Max ~20k liters
     features.append(inventory.get('medicine_units', 0) / 1000)
     features.append(inventory.get('shelter_units', 0) / 500)
     features.append(inventory.get('blankets_units', 0) / 1000)
     
-    # Demand features (normalized)
-    demand = state.get('demand', {})
-    features.append(demand.get('food_kg', 0) / 10000)
-    features.append(demand.get('water_liters', 0) / 20000)
-    features.append(demand.get('medicine_units', 0) / 1000)
-    features.append(demand.get('shelter_units', 0) / 500)
-    
-    # Time features
-    time_info = state.get('time', {})
-    features.append(time_info.get('hour_of_day', 12) / 24)  # Normalize to [0, 1]
-    features.append(time_info.get('day_of_week', 3) / 7)
-    features.append(time_info.get('days_since_disaster', 0) / 30)  # Normalize by 30 days
-    
-    # Risk features
-    risk = state.get('risk', {})
-    features.append(risk.get('flood_risk', 0.5))  # Already [0, 1]
-    features.append(risk.get('accessibility', 0.8))  # Road accessibility
-    
+    # Current demand (4 features)
     # Resource availability
     resources = state.get('resources', {})
     features.append(resources.get('trucks_available', 10) / 20)
@@ -68,7 +43,7 @@ def extract_state_features(state: Dict[str, Any]) -> np.ndarray:
 
 
 def create_sample_state() -> Dict[str, Any]:
-    """Create a sample state for testing"""
+    """Creates a sample state for testing the feature extraction"""
     return {
         'inventory': {
             'food_kg': 5000,

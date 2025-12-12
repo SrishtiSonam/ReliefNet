@@ -1,3 +1,5 @@
+# Mock data for testing and demo purposes
+# This generates realistic-looking data for the Indian disaster management system
 import random
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
@@ -6,8 +8,8 @@ from models import (
     RequestType, RequestStatus, Roadblock
 )
 
-
-# India districts with coordinates (Major cities across India)
+# Major cities across India with their coordinates
+# Using real lat/lng for accurate map visualization
 DISTRICTS_DATA = [
     {"id": "DL01", "name": "New Delhi", "state": "Delhi", "lat": 28.6139, "lng": 77.2090, "population": 16787941, "risk_level": "medium"},
     {"id": "MH01", "name": "Mumbai", "state": "Maharashtra", "lat": 19.0760, "lng": 72.8777, "population": 12442373, "risk_level": "high"},
@@ -33,12 +35,15 @@ DISTRICTS_DATA = [
 
 
 def get_districts() -> List[District]:
-    """Get list of all districts"""
+    """Returns all districts as Pydantic models"""
     return [District(**d) for d in DISTRICTS_DATA]
 
 
 def get_district_geojson() -> Dict[str, Any]:
-    """Generate GeoJSON for district boundaries"""
+    """
+    Creates GeoJSON for map visualization.
+    Generates simple polygons around each district center.
+    """
     features = []
     for district in DISTRICTS_DATA:
         # Create a simple polygon around the district center
@@ -73,7 +78,7 @@ def get_district_geojson() -> Dict[str, Any]:
 
 
 def get_warehouses() -> List[Warehouse]:
-    """Get list of warehouses with stock levels"""
+    """Generate warehouses with random stock levels for each district"""
     warehouses = []
     for i, district in enumerate(DISTRICTS_DATA):
         warehouses.append(Warehouse(
@@ -93,7 +98,8 @@ def get_warehouses() -> List[Warehouse]:
     return warehouses
 
 
-# Global vehicle state (Vehicles across India)
+# Fleet of vehicles across India
+# Mix of trucks, UAVs (drones), and ambulances
 VEHICLES = [
     Vehicle(
         id="TRK001",
@@ -258,7 +264,7 @@ def get_vehicles() -> List[Vehicle]:
 
 
 def update_vehicle_positions():
-    """Simulate vehicle movement"""
+    """Simulates vehicle movement with random walk"""
     for vehicle in VEHICLES:
         if vehicle.status == "in_transit":
             # Random walk simulation
@@ -266,7 +272,7 @@ def update_vehicle_positions():
             vehicle.lng += random.uniform(-0.01, 0.01)
 
 
-# Public requests storage
+# Storage for public relief requests
 PUBLIC_REQUESTS: List[PublicRequest] = [
     PublicRequest(
         id="REQ001",
@@ -316,14 +322,14 @@ def get_public_requests() -> List[PublicRequest]:
 
 
 def add_public_request(request: PublicRequest) -> PublicRequest:
-    """Add a new public request"""
+    """Adds a new request and assigns it an ID"""
     request.id = f"REQ{len(PUBLIC_REQUESTS)+1:03d}"
     request.created_at = datetime.now()
     PUBLIC_REQUESTS.append(request)
     return request
 
 
-# Roadblocks storage
+# Road blockages reported by officials or public
 ROADBLOCKS: List[Roadblock] = [
     Roadblock(
         id="RB001",
@@ -362,7 +368,10 @@ def add_roadblock(roadblock: Roadblock) -> Roadblock:
 
 
 def get_shelters() -> List[Dict[str, Any]]:
-    """Get list of shelters across India"""
+    """
+    Generates emergency shelters for each district.
+    Different types have different capacities and facilities.
+    """
     shelters = []
     shelter_types = ["Community Hall", "Government School", "Sports Stadium", "Municipal Building", "Relief Camp"]
     

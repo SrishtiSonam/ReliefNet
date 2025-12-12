@@ -1,7 +1,5 @@
-"""
-Vehicle Routing Problem (VRP) solver using OR-Tools
-Optimizes truck routes for bulk resource delivery
-"""
+# Vehicle routing optimization using Google OR-Tools
+# Solves the VRP (Vehicle Routing Problem) for truck deliveries
 from ortools.constraint_solver import routing_enums_pb2
 from ortools.constraint_solver import pywrapcp
 import numpy as np
@@ -15,13 +13,8 @@ from config import OPTIMIZATION_CONFIG
 
 def create_distance_matrix(locations: List[Tuple[float, float]]) -> np.ndarray:
     """
-    Create distance matrix from locations using haversine formula
-    
-    Args:
-        locations: List of (lat, lng) tuples
-    
-    Returns:
-        Distance matrix in km
+    Calculates distances between all location pairs using haversine formula.
+    Returns a matrix where distances[i][j] is the distance from i to j in km.
     """
     n = len(locations)
     distances = np.zeros((n, n))
@@ -52,17 +45,10 @@ def solve_vrp(depot_location: Tuple[float, float],
               num_vehicles: int = 5,
               vehicle_capacity: float = None) -> Dict[str, Any]:
     """
-    Solve Vehicle Routing Problem with capacity constraints
+    Solves the VRP using OR-Tools.
     
-    Args:
-        depot_location: (lat, lng) of warehouse/depot
-        delivery_locations: List of (lat, lng) for delivery points
-        demands: List of demand quantities at each location
-        num_vehicles: Number of trucks available
-        vehicle_capacity: Truck capacity in kg
-    
-    Returns:
-        Dictionary with routes and metrics
+    Finds optimal routes for trucks to deliver resources from depot to all
+    delivery points while respecting capacity constraints.
     """
     if vehicle_capacity is None:
         vehicle_capacity = OPTIMIZATION_CONFIG['truck_capacity_kg']

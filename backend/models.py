@@ -1,9 +1,12 @@
+# Data models for the API
+# Using Pydantic for validation and serialization
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
 
 
+# User roles in the system
 class UserRole(str, Enum):
     STATE_ADMIN = "state_admin"
     DISTRICT_ADMIN = "district_admin"

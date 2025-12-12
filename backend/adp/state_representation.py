@@ -1,21 +1,14 @@
-"""
-State representation for Approximate Dynamic Programming
-Defines the state space for disaster resource allocation
-"""
+# State representation for the ADP solver
+# Keeps track of inventory, demand, time, vehicles, and risk scores
 from typing import Dict, List, Any
 import numpy as np
 
-
 class State:
     """
-    State representation for ADP
+    Represents the current state of the disaster response system.
     
-    Components:
-    - Warehouse inventory levels (by resource type)
-    - Current demand at each zone
-    - Time since disaster
-    - Vehicle availability
-    - Risk scores
+    Tracks everything we need to make allocation decisions:
+    inventory, demand, time, vehicles, and risk.
     """
     
     def __init__(self, 

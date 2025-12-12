@@ -1,7 +1,6 @@
-"""
-Updated Flask backend with real ML integration
-Replaces placeholders with actual AI/ML models
-"""
+# ReliefNet Backend API
+# FastAPI server with ML models for disaster management
+# This handles all the API endpoints for forecasting, optimization, and explainability
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Query, Body
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional, Dict, Any
@@ -56,11 +55,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load VFA models
+# Try to load the VFA model, create a new one if it doesn't exist
 print("Loading VFA models...")
 try:
     nn_vfa_model = NNVFA.load_model()
 except:
+    # Model not found, create a fresh one
     print("Creating new NN-VFA model...")
     from vfa import create_pretrained_nn_vfa
     nn_vfa_model = create_pretrained_nn_vfa()
@@ -148,14 +148,10 @@ async def get_dashboard(role: UserRole = Query(...)):
 @app.get("/api/forecast")
 async def get_forecast(district: str = Query("Mumbai"), days: int = Query(7)):
     """
-    EDUCATIONAL DEMO: Mock ML Forecasting Endpoint
+    Forecast demand for the next N days using ensemble ML models.
     
-    HOW IT WORKS:
-    1. Uses ARIMA + GARCH ensemble to predict demand
-    2. Returns 7-day forecast with confidence intervals
-    3. Shows how forecasting affects allocation decisions
-    
-    This demonstrates the ML forecasting pipeline!
+    Uses ARIMA + GARCH + simple baseline, weighted ensemble.
+    Returns predictions with confidence scores.
     """
     try:
         # Use mock ensemble forecast (educational demonstration)
@@ -189,7 +185,7 @@ async def get_forecast(district: str = Query("Mumbai"), days: int = Query(7)):
 
 @app.post("/api/optimize")
 async def optimize_allocation(request: Dict[str, Any] = Body(...)):
-    """Optimize resource allocation using OR-Tools"""
+    """Run the OR-Tools vehicle routing optimization"""
     try:
         warehouses = get_warehouses()
         warehouses_data = [w.dict() for w in warehouses]
@@ -222,7 +218,7 @@ async def optimize_allocation(request: Dict[str, Any] = Body(...)):
 
 @app.post("/api/optimize/recalculate")
 async def recalculate_optimization(request: Dict[str, Any] = Body(...)):
-    """Recalculate with human-in-the-loop constraints"""
+    """Re-run optimization with user-provided constraints (HITL)"""
     try:
         original_plan = request.get('original_plan', {})
         new_constraints = request.get('constraints', {})
@@ -240,7 +236,7 @@ async def recalculate_optimization(request: Dict[str, Any] = Body(...)):
 
 @app.get("/api/explain/shap")
 async def get_shap_explanation(district_id: str = Query(...)):
-    """SHAP explanation for allocation"""
+    """Get SHAP feature importance for an allocation decision"""
     try:
         # Create sample state
         state = create_sample_state()
@@ -293,16 +289,10 @@ async def get_vfa_value(state_dict: Dict[str, Any] = Body(...)):
 @app.post("/api/allocate/simulate")
 async def simulate_allocation(request: Dict[str, Any] = Body(...)):
     """
-    EDUCATIONAL DEMO: Allocation Simulation
+    Simulate resource allocation across districts.
     
-    HOW IT WORKS:
-    1. Takes district demands and available stock
-    2. Calculates priority scores for each district
-    3. Allocates resources based on priority
-    4. Selects vehicles (trucks vs UAVs) based on conditions
-    5. Returns allocation plan with VFA scores
-    
-    This shows the complete allocation engine logic!
+    Takes demand data, calculates priorities, allocates resources,
+    and picks vehicle types. Returns the full allocation plan.
     """
     try:
         districts = request.get('districts', [])
@@ -440,14 +430,10 @@ async def get_warehouse_stock_list(district: Optional[str] = None):
 @app.post("/api/rerun")
 async def rerun_allocation(request: Dict[str, Any] = Body(...)):
     """
-    EDUCATIONAL DEMO: Re-run Allocation
+    Re-run allocation with updated data (blockages, stock changes, etc).
     
-    HOW IT WORKS:
-    1. Gets updated data (blockages, stock, new requests)
-    2. Re-calculates allocation with new constraints
-    3. Shows how system adapts to changes
-    
-    Demonstrates dynamic decision-making!
+    Pulls fresh data from DB and recalculates everything.
+    Shows how the system adapts to changing conditions.
     """
     try:
         # Get updated data from database
@@ -643,20 +629,20 @@ async def tft_compare(district: str = Query("Mumbai")):
 async def startup_event():
     global tft_model, tft_training_data
     
-    print("🚀 ReliefNet ML-Powered API started")
-    print("📍 API Documentation: http://localhost:8000/docs")
-    print("🤖 ML Models: Active")
+    print("ReliefNet ML-Powered API started")
+    print("API Documentation: http://localhost:8000/docs")
+    print("ML Models: Active")
     
     # Load Mock TFT (always available)
     try:
         from ml_models.mock_tft import MockTFTForecaster
         tft_model = MockTFTForecaster()
-        print("✅ TFT model loaded (Mock for educational demo)")
+        print("TFT model loaded (Mock for educational demo)")
         print("   - Multi-horizon forecasting: ✓")
         print("   - Attention mechanisms: ✓")
         print("   - Uncertainty quantification: ✓")
     except Exception as e:
-        print(f"⚠️  Could not load TFT model: {e}")
+        print(f"Could not load TFT model: {e}")
 
 if __name__ == "__main__":
     import uvicorn
