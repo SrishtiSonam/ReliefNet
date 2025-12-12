@@ -19,10 +19,10 @@ print("Step 1: Initializing SQLite Database...")
 try:
     from database.db_manager import DatabaseManager
     db = DatabaseManager()
-    print("✅ Database created successfully!")
+    print(" Database created successfully!")
     print(f"   Location: {db.db_path}")
 except Exception as e:
-    print(f"❌ Database initialization failed: {e}")
+    print(f Database initialization failed: {e}")
     sys.exit(1)
 
 # Step 2: Verify Tables
@@ -33,12 +33,12 @@ try:
     blockages = db.get_road_blockages()
     vehicles = db.get_vehicles()
     
-    print(f"✅ Found {len(warehouses)} warehouses")
-    print(f"✅ Found {len(requests)} public requests")
-    print(f"✅ Found {len(blockages)} road blockages")
-    print(f"✅ Found {len(vehicles)} vehicles")
+    print(f" Found {len(warehouses)} warehouses")
+    print(f" Found {len(requests)} public requests")
+    print(f" Found {len(blockages)} road blockages")
+    print(f" Found {len(vehicles)} vehicles")
 except Exception as e:
-    print(f"❌ Table verification failed: {e}")
+    print(f" Table verification failed: {e}")
     sys.exit(1)
 
 # Step 3: Test Mock ML Logic
@@ -53,7 +53,7 @@ try:
     
     # Test forecasting
     forecast = ensemble_forecast('Mumbai', days=7)
-    print(f"✅ Forecasting works - {forecast['forecast_days']} day forecast generated")
+    print(f" Forecasting works - {forecast['forecast_days']} day forecast generated")
     
     # Test VFA
     state = {
@@ -64,7 +64,7 @@ try:
         'accessibility': 0.7
     }
     vfa_score, _ = calculate_vfa_score(state)
-    print(f"✅ VFA calculation works - Score: {vfa_score}")
+    print(f" VFA calculation works - Score: {vfa_score}")
     
     # Test allocation
     districts = [
@@ -79,20 +79,20 @@ try:
     ]
     stock = {'food': 15000, 'water': 30000, 'medical': 2000}
     allocations = allocate_resources(districts, stock)
-    print(f"✅ Allocation works - {len(allocations)} allocations generated")
+    print(f" Allocation works - {len(allocations)} allocations generated")
     
 except Exception as e:
-    print(f"❌ ML logic test failed: {e}")
+    print(f" ML logic test failed: {e}")
     sys.exit(1)
 
 # Step 4: Display Sample Data
 print("\nStep 4: Sample Data Preview...")
-print("\n📦 Warehouses (India):")
+print("\n Warehouses (India):")
 for wh in warehouses[:3]:
     print(f"   - {wh['warehouse_name']}, {wh['district']}, {wh['state']}")
     print(f"     Stock: {wh['food_kg']}kg food, {wh['water_liters']}L water")
 
-print("\n📋 Public Requests:")
+print("\n Public Requests:")
 for req in requests[:3]:
     print(f"   - {req['name']} from {req['district']}")
     print(f"     Needs: {req['resource_type']} (Severity: {req['severity_level']})")
@@ -104,7 +104,7 @@ for block in blockages[:3]:
 
 # Final Summary
 print("\n" + "=" * 60)
-print("✅ Setup Complete!")
+print(" Setup Complete!")
 print("=" * 60)
 print("\nNext Steps:")
 print("1. Start Backend:")
@@ -116,5 +116,5 @@ print("   npm run dev")
 print("\n3. Open Browser:")
 print("   http://localhost:5173")
 print("\n" + "=" * 60)
-print("📚 Read DEMO_GUIDE.md for interactive tutorials!")
+print(" Read DEMO_GUIDE.md for interactive tutorials!")
 print("=" * 60)

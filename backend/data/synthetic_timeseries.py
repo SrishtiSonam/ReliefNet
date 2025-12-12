@@ -122,12 +122,12 @@ def save_training_data(output_path='data/tft_training_data.csv'):
     
     df = generate_synthetic_timeseries()
     df.to_csv(output_path, index=False)
-    print(f"✅ Generated {len(df)} rows of training data")
-    print(f"📊 Date range: {df['date'].min()} to {df['date'].max()}")
-    print(f"🏙️ Districts: {df['district'].nunique()}")
+    print(f"Generated {len(df)} rows of training data")
+    print(f"Date range: {df['date'].min()} to {df['date'].max()}")
+    print(f"Districts: {df['district'].nunique()}")
     return df
 
 if __name__ == '__main__':
     df = save_training_data()
-    print("\n📈 Sample data:")
+    print("\nSample data:")
     print(df.head(10))

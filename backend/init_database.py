@@ -32,14 +32,14 @@ print("\nCreating tables...")
 with open(SCHEMA_PATH, 'r', encoding='utf-8') as f:
     schema_sql = f.read()
     conn.executescript(schema_sql)
-print("✅ Tables created")
+print(" Tables created")
 
 # Execute seed data
 print("\nInserting seed data...")
 with open(SEED_PATH, 'r', encoding='utf-8') as f:
     seed_sql = f.read()
     conn.executescript(seed_sql)
-print("✅ Seed data inserted")
+print(" Seed data inserted")
 
 # Verify
 cursor.execute("SELECT COUNT(*) FROM warehouse_stock")
@@ -57,7 +57,7 @@ vehicles = cursor.fetchone()[0]
 conn.close()
 
 print("\n" + "="*60)
-print("✅ Database initialized successfully!")
+print(" Database initialized successfully!")
 print("="*60)
 print(f"Warehouses: {warehouses}")
 print(f"Public Requests: {requests}")

@@ -525,4 +525,4 @@ if __name__ == "__main__":
     explanation = generate_shap_explanation(allocations[0])
     print(f"   - {explanation['explanation'][:150]}...")
     
-    print("\n✅ All mock ML functions working correctly!")
+    print("\n All mock ML functions working correctly!")
