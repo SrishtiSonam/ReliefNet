@@ -1,6 +1,0 @@
-# Temporal Fusion Transformer Dependencies
-pytorch-forecasting>=0.10.0
-pytorch-lightning>=2.0.0
-torch>=2.0.0
-torchvision>=0.15.0
-torchaudio>=2.0.0
