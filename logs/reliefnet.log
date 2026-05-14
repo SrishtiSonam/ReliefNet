@@ -1,0 +1,72 @@
+[2026-05-13 22:11:46] INFO — root — Logging configured – level INFO
+[2026-05-13 22:12:02] INFO — root — Logging configured – level INFO
+[2026-05-13 22:16:48] INFO — root — Logging configured – level INFO
+[2026-05-13 22:32:20] INFO — root — Logging configured – level INFO
+[2026-05-14 00:33:41] INFO — root — Logging configured – level INFO
+[2026-05-14 00:47:20] INFO - root - Logging configured - level INFO
+[2026-05-14 00:48:37] INFO - root - Logging configured - level INFO
+[2026-05-14 00:48:38] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 00:52:57] INFO - root - Logging configured - level INFO
+[2026-05-14 00:52:57] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:16:32] INFO - root - Logging configured - level INFO
+[2026-05-14 01:16:33] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:16:39] INFO - root - Logging configured - level INFO
+[2026-05-14 01:16:39] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:16:55] INFO - root - Logging configured - level INFO
+[2026-05-14 01:16:55] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:17:22] INFO - root - Logging configured - level INFO
+[2026-05-14 01:17:22] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:17:29] INFO - root - Logging configured - level INFO
+[2026-05-14 01:17:29] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:27:12] INFO - root - Logging configured - level INFO
+[2026-05-14 01:27:12] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:27:18] INFO - root - Logging configured - level INFO
+[2026-05-14 01:27:18] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:27:55] INFO - root - Logging configured - level INFO
+[2026-05-14 01:27:55] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:35:21] INFO - root - Logging configured - level INFO
+[2026-05-14 01:35:21] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:50:45] INFO - root - Logging configured - level INFO
+[2026-05-14 01:50:46] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:57:30] INFO - root - Logging configured - level INFO
+[2026-05-14 01:57:30] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:57:53] INFO - root - Logging configured - level INFO
+[2026-05-14 01:57:54] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 01:58:42] INFO - root - Logging configured - level INFO
+[2026-05-14 01:58:43] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 02:03:33] INFO - root - Logging configured - level INFO
+[2026-05-14 02:03:33] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 02:03:41] INFO - root - Logging configured - level INFO
+[2026-05-14 02:03:41] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 02:10:14] INFO - root - Logging configured - level INFO
+[2026-05-14 02:10:15] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:19:39] INFO - root - Logging configured - level INFO
+[2026-05-14 06:19:39] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:30:37] INFO - root - Logging configured - level INFO
+[2026-05-14 06:30:37] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:35:30] INFO - root - Logging configured - level INFO
+[2026-05-14 06:35:31] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:40:48] INFO - root - Logging configured - level INFO
+[2026-05-14 06:40:48] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:41:02] INFO - root - Logging configured - level INFO
+[2026-05-14 06:41:02] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:42:50] INFO - root - Logging configured - level INFO
+[2026-05-14 06:42:50] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:43:54] INFO - root - Logging configured - level INFO
+[2026-05-14 06:43:54] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:45:58] INFO - root - Logging configured - level INFO
+[2026-05-14 06:45:58] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:55:10] INFO - root - Logging configured - level INFO
+[2026-05-14 06:55:11] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 06:55:29] INFO - root - Logging configured - level INFO
+[2026-05-14 06:55:29] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 07:03:05] INFO - root - Logging configured - level INFO
+[2026-05-14 07:03:05] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 07:05:26] INFO - root - Logging configured - level INFO
+[2026-05-14 07:05:26] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 07:23:10] INFO - root - Logging configured - level INFO
+[2026-05-14 07:23:10] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 07:24:20] INFO - root - Logging configured - level INFO
+[2026-05-14 07:24:20] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.
+[2026-05-14 07:47:19] INFO - root - Logging configured - level INFO
+[2026-05-14 07:47:19] INFO - app.db.indexes - [OK] All MongoDB indexes created successfully.

@@ -1,0 +1,519 @@
+# ReliefNet — Full-Stack AI Platform: Implementation Plan
+## (Local Development Only)
+
+## Overview
+
+Builds the production-grade ReliefNet software platform from the existing notebook pipeline output.
+**No Docker. No deployment config. Pure local development.**
+
+---
+
+## Notebook Dataset Reference
+
+### Source Datasets (Input to Notebook)
+
+| Dataset | Path | Format | Key Fields |
+|---|---|---|---|
+| **EM-DAT Disaster Events** | `data/raw/emdat/*.csv` | CSV | `dis_no`, `year`, `start_month`, `end_month`, `disaster_type`, `disaster_subtype`, `province`, `district`, `total_deaths`, `total_affected`, `total_damage_usd`, `latitude`, `longitude` |
+| **NFHS-5 Health Indicators** | `data/raw/govdata/*.csv/.xlsx` | CSV/Excel | `nfhs_stunting_pct`, `nfhs_underweight_pct`, `nfhs_anemia_children`, `nfhs_institutional_birth` |
+| **Infrastructure Dataset** | `data/raw/govdata/*.csv` | CSV | `state`, `district`, `population`, `area_sq_km`, `num_hospitals`, `num_warehouses`, `num_shelters`, `shelter_capacity_total`, `num_telecom_towers`, `road_length_km`, `num_bridges`, `has_airport`, `has_railway`, `river_proximity_km`, `coastal_district`, `avg_elevation_m` |
+| **Warehouse Inventory** | embedded in infra CSV | CSV | `warehouse_rice_tons`, `warehouse_wheat_tons`, `warehouse_medicine_kits`, `warehouse_tarpaulin_units` |
+| **GIS Shapefiles / GeoJSON** | `data/raw/gis/` | Shapefile / GeoJSON | District polygons in EPSG:4326 |
+| **LGD District Master** | Hard-coded in notebook | Python list | `state`, `district_canonical`, `lgd_code` (e.g. `MH_001`, `KL_002`) |
+
+> The notebook generates **synthetic versions** of all datasets when real files are absent. Backend works identically with synthetic or real data.
+
+### Notebook Export Outputs (Backend reads these)
+
+| File | Path | Used By |
+|---|---|---|
+| `reliefnet_district_features.csv` | `data/exports/` | Data loader → `districts` collection |
+| `reliefnet_district_features.parquet` | `data/exports/` | ML services |
+| `reliefnet_disasters.csv` | `data/exports/` | Data loader → `disasters` collection |
+| `reliefnet_disasters.parquet` | `data/exports/` | ML services |
+| `reliefnet_road_edges.csv` | `data/exports/` | Data loader → `road_network` collection |
+| `district_mapping_report.csv` | `data/reports/` | Debug / admin UI |
+| `validation_report.json` | `data/reports/` | Admin dashboard |
+
+### Engineered Feature Matrix (Exact Column Schema)
+
+```
+# Identity
+district, state, lgd_code, latitude, longitude
+
+# Raw Infrastructure
+population, area_sq_km, num_hospitals, num_warehouses, num_shelters,
+shelter_capacity_total, num_telecom_towers, road_length_km, num_bridges,
+has_airport, has_railway, river_proximity_km, coastal_district, avg_elevation_m
+
+# NFHS-5 Health
+nfhs_stunting_pct, nfhs_underweight_pct, nfhs_anemia_children, nfhs_institutional_birth
+
+# Warehouse Stock
+warehouse_rice_tons, warehouse_wheat_tons, warehouse_medicine_kits, warehouse_tarpaulin_units
+
+# Engineered — Density/Access
+population_density, hospital_density_per_1000sqkm, shelter_capacity_per_1000,
+telecom_density_per_100sqkm, transport_accessibility
+
+# Engineered — Risk
+flood_risk_score [0-1], health_vulnerability [0-1], warehouse_supply_per_capita
+
+# Engineered — Historical (from EM-DAT)
+disaster_frequency, total_deaths_historical, total_affected_historical,
+total_damage_usd_historical, historical_damage_score [0-1], avg_recency_weight
+
+# Engineered — Road Network (from NetworkX graph)
+network_degree, betweenness_centrality, avg_road_failure_prob [0-1],
+max_road_failure_prob [0-1], is_isolated
+
+# Engineered — Spatial
+nearest_warehouse_km
+
+# Vulnerability Index
+vulnerability_score [0-1], vulnerability_score_pca [0-1],
+vulnerability_tier (LOW|MEDIUM|HIGH|CRITICAL)
+
+# UAV & Logistics
+uav_reachable_within_range, uav_terrain_penalty [0-1],
+truck_estimated_hours, truck_accessibility_score [0-1],
+disconnected_region_score [0-1],
+preferred_delivery_mode (truck|uav|both|emergency_airlift)
+```
+
+### Road Network Edge Schema
+
+```
+source, target                  — district names
+distance_km                     — Euclidean distance
+flood_risk                      — edge flood exposure score
+landslide_risk                  — elevation-difference risk
+failure_probability             — combined edge failure probability [0-1]
+```
+
+### Disaster Event Schema (EM-DAT enriched)
+
+```
+dis_no, year, start_month, end_month, disaster_type, disaster_subtype,
+country, province, district, district_canonical, district_lgd_code,
+total_deaths, total_affected, total_damage_usd, latitude, longitude,
+disaster_start_date, disaster_end_date, disaster_duration_days,
+season (Monsoon|Post-Monsoon|Winter|Pre-Monsoon), decade, recency_weight
+```
+
+---
+
+## Monorepo Folder Structure
+
+```
+reliefnet/                          ← project root
+│
+├── backend/                        ← FastAPI backend
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── config.py
+│   │   ├── logging_config.py
+│   │   ├── dependencies.py
+│   │   ├── api/
+│   │   │   └── v1/
+│   │   │       ├── router.py
+│   │   │       ├── auth.py
+│   │   │       ├── districts.py
+│   │   │       ├── warehouses.py
+│   │   │       ├── disasters.py
+│   │   │       ├── simulation.py
+│   │   │       ├── forecasting.py
+│   │   │       ├── allocation.py
+│   │   │       └── explainability.py
+│   │   ├── core/
+│   │   │   ├── auth/
+│   │   │   │   ├── jwt_handler.py
+│   │   │   │   └── roles.py
+│   │   │   ├── simulation/
+│   │   │   │   ├── engine.py
+│   │   │   │   ├── flood_model.py
+│   │   │   │   └── shortage_estimator.py
+│   │   │   ├── forecasting/
+│   │   │   │   ├── service.py
+│   │   │   │   └── interfaces.py
+│   │   │   ├── optimization/
+│   │   │   │   ├── service.py
+│   │   │   │   ├── interfaces.py
+│   │   │   │   ├── truck_optimizer.py
+│   │   │   │   └── uav_optimizer.py
+│   │   │   ├── explainability/
+│   │   │   │   ├── service.py
+│   │   │   │   └── interfaces.py
+│   │   │   ├── hitl/
+│   │   │   │   └── override_service.py
+│   │   │   └── data_loader.py      ← reads notebook exports → MongoDB
+│   │   ├── db/
+│   │   │   ├── mongo.py
+│   │   │   ├── indexes.py
+│   │   │   └── repositories/
+│   │   │       ├── base.py
+│   │   │       ├── district_repo.py
+│   │   │       ├── warehouse_repo.py
+│   │   │       ├── disaster_repo.py
+│   │   │       ├── shelter_repo.py
+│   │   │       ├── hospital_repo.py
+│   │   │       ├── simulation_repo.py
+│   │   │       ├── forecast_repo.py
+│   │   │       ├── allocation_repo.py
+│   │   │       └── user_repo.py
+│   │   ├── models/
+│   │   │   ├── common.py
+│   │   │   ├── district.py
+│   │   │   ├── warehouse.py
+│   │   │   ├── disaster.py
+│   │   │   ├── shelter.py
+│   │   │   ├── hospital.py
+│   │   │   ├── simulation.py
+│   │   │   ├── forecast.py
+│   │   │   ├── allocation.py
+│   │   │   └── user.py
+│   │   └── utils/
+│   │       ├── geo.py
+│   │       └── pagination.py
+│   ├── tests/
+│   │   ├── unit/
+│   │   ├── integration/
+│   │   └── conftest.py
+│   ├── requirements.txt
+│   └── requirements-dev.txt
+│
+├── frontend/                       ← React + Vite + Tailwind
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── router.tsx
+│   │   ├── pages/
+│   │   │   ├── Login/
+│   │   │   ├── Dashboard/
+│   │   │   ├── DistrictMonitor/
+│   │   │   ├── WarehouseMonitor/
+│   │   │   ├── SimulationPage/
+│   │   │   ├── AllocationView/
+│   │   │   └── PublicPortal/
+│   │   ├── components/
+│   │   │   ├── layout/
+│   │   │   ├── map/
+│   │   │   ├── charts/
+│   │   │   ├── cards/
+│   │   │   └── ui/
+│   │   ├── store/
+│   │   │   ├── authStore.ts
+│   │   │   ├── districtStore.ts
+│   │   │   ├── simulationStore.ts
+│   │   │   └── allocationStore.ts
+│   │   ├── api/
+│   │   │   ├── client.ts
+│   │   │   ├── districtApi.ts
+│   │   │   ├── warehouseApi.ts
+│   │   │   ├── simulationApi.ts
+│   │   │   ├── allocationApi.ts
+│   │   │   └── forecastApi.ts
+│   │   ├── types/
+│   │   │   ├── district.ts
+│   │   │   ├── simulation.ts
+│   │   │   ├── allocation.ts
+│   │   │   └── common.ts
+│   │   └── hooks/
+│   │       ├── useDistricts.ts
+│   │       ├── useSimulation.ts
+│   │       └── useAllocation.ts
+│   ├── public/
+│   ├── index.html
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   └── tailwind.config.js
+│
+├── ml_services/                    ← Standalone ML service scripts
+│   ├── forecasting/
+│   │   ├── service.py
+│   │   ├── interfaces.py
+│   │   └── models/
+│   │       ├── arima_model.py
+│   │       ├── xgboost_model.py
+│   │       └── lstm_model.py
+│   ├── optimization/
+│   │   ├── service.py
+│   │   ├── interfaces.py
+│   │   ├── truck_optimizer.py
+│   │   ├── uav_optimizer.py
+│   │   └── route_planner.py
+│   └── explainability/
+│       ├── service.py
+│       └── interfaces.py
+│
+├── data/                           ← Notebook output landing zone (gitignored)
+│   ├── exports/                    ← reliefnet_district_features.*, reliefnet_disasters.*, reliefnet_road_edges.csv
+│   ├── raw/
+│   │   ├── emdat/
+│   │   ├── govdata/
+│   │   ├── gis/
+│   │   └── kaggle/
+│   └── reports/
+│
+├── .env.example
+└── README.md
+```
+
+---
+
+## Dependency Files (No Docker)
+
+### `backend/requirements.txt`
+```
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+motor==3.4.0                  # async MongoDB driver
+pymongo==4.7.2
+pydantic==2.7.1
+pydantic-settings==2.2.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+pandas==2.2.2
+pyarrow==16.0.0               # read parquet exports
+numpy==1.26.4
+networkx==3.3                 # road graph queries
+python-dotenv==1.0.1
+httpx==0.27.0
+```
+
+### `backend/requirements-dev.txt`
+```
+-r requirements.txt
+pytest==8.2.0
+pytest-asyncio==0.23.6
+httpx==0.27.0
+black==24.4.1
+isort==5.13.2
+mypy==1.10.0
+```
+
+### `ml_services/` additional packages
+```
+scikit-learn==1.4.2
+xgboost==2.0.3
+statsmodels==0.14.2           # ARIMA
+torch==2.3.0                  # LSTM (CPU build)
+shap==0.45.0
+ortools==9.9.3963             # VRP optimization
+pulp==2.8.0                   # LP optimization
+```
+
+### `frontend/package.json` (key deps)
+```json
+{
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.23.0",
+    "react-leaflet": "^4.2.1",
+    "leaflet": "^1.9.4",
+    "zustand": "^4.5.2",
+    "axios": "^1.7.2",
+    "recharts": "^2.12.7",
+    "@tanstack/react-query": "^5.37.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "@vitejs/plugin-react": "^4.3.0",
+    "tailwindcss": "^3.4.3",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38"
+  }
+}
+```
+
+---
+
+## Environment Variables (`.env.example`)
+
+```env
+# MongoDB — install and run MongoDB Community locally
+MONGO_URI=mongodb://localhost:27017/
+MONGO_DB=reliefnet
+
+# JWT
+JWT_SECRET_KEY=change_this_to_a_random_secret
+JWT_ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+# Paths
+DATA_EXPORT_DIR=../data/exports
+
+# CORS — frontend dev server
+CORS_ORIGINS=http://localhost:5173
+
+# Log level
+LOG_LEVEL=INFO
+```
+
+---
+
+## Local Development Startup
+
+```bash
+# 1. Start MongoDB (install MongoDB Community Edition locally)
+#    Windows:  net start MongoDB
+#    Mac:      brew services start mongodb-community
+
+# 2. Backend
+cd backend
+python -m venv venv
+venv\Scripts\activate          # Windows
+pip install -r requirements.txt
+cp ../.env.example .env
+uvicorn app.main:app --reload --port 8000
+
+# 3. Load notebook data into MongoDB (run once after notebook execution)
+python -m app.core.data_loader --export-dir ../data/exports/
+
+# 4. Frontend (separate terminal)
+cd frontend
+npm install
+npm run dev                    # runs on http://localhost:5173
+```
+
+---
+
+## Phase-by-Phase Build Order
+
+### PHASE 1 — Project Scaffold
+- Create full folder structure above
+- Write `requirements.txt`, `package.json`, `.env.example`
+- Initialize `backend/app/main.py` (app factory, CORS, lifespan)
+- Initialize `backend/app/config.py` (Pydantic Settings)
+- Initialize Vite + Tailwind frontend
+
+### PHASE 2 — MongoDB Layer
+- `backend/app/db/mongo.py` — Motor async client
+- `backend/app/db/indexes.py` — all 11 collections + indexes
+- `backend/app/db/repositories/base.py` — generic async CRUD
+- All 9 concrete repositories
+
+### PHASE 3 — Pydantic Models
+- All models derived from notebook feature matrix schema
+- `DistrictFeatures`, `DisasterEvent`, `Warehouse`, `SimulationRequest/Result`, `AllocationPlan`, `OverrideRecord`
+
+### PHASE 4 — Data Loader
+- `backend/app/core/data_loader.py`
+- Reads parquet/CSV from `data/exports/`, validates with Pydantic, upserts into MongoDB
+
+### PHASE 5 — FastAPI Endpoints
+- Auth (JWT login, role-based `Depends`)
+- Districts, Warehouses, Disasters, Simulation, Allocation, Forecasting (scaffold), Explainability
+
+### PHASE 6 — Frontend Foundation
+- Vite app, Tailwind design tokens, React Router
+- Layout shell (sidebar, topbar, dark mode)
+- All 7 page components scaffolded
+
+### PHASE 7 — GIS Map Components
+- Leaflet base map centered on India
+- District choropleth (vulnerability color scale)
+- Warehouse markers, route polylines, UAV arcs, disaster zone overlay
+
+### PHASE 8 — Simulation Engine
+- `core/simulation/engine.py` — disaster event → affected districts → estimated shortages
+- `core/simulation/flood_model.py` — uses `flood_risk_score`, `avg_road_failure_prob` from feature matrix
+- `core/simulation/shortage_estimator.py` — uses `population`, `vulnerability_score`, `warehouse_supply_per_capita`
+
+### PHASE 9 — Optimization + Explainability (Scaffold)
+- Truck + UAV optimizer interfaces
+- SHAP explanation interfaces
+- HITL override workflow
+
+### PHASE 10 — ML Services Scaffold
+- Forecasting model interfaces
+- Route planner using NetworkX on road_network collection data
+
+---
+
+## API Contracts Summary
+
+```
+POST /api/v1/auth/login
+GET  /api/v1/districts                   ?state=&tier=&page=&limit=
+GET  /api/v1/districts/{name}
+GET  /api/v1/districts/{name}/risk
+GET  /api/v1/districts/near?lat=&lon=&radius_km=
+GET  /api/v1/warehouses
+GET  /api/v1/warehouses/{id}
+PUT  /api/v1/warehouses/{id}/inventory
+GET  /api/v1/disasters                   ?type=&season=&district=
+GET  /api/v1/disasters/stats/by-season
+GET  /api/v1/disasters/stats/by-type
+POST /api/v1/simulation/run
+GET  /api/v1/simulation/{run_id}
+GET  /api/v1/simulation/{run_id}/map     → GeoJSON for Leaflet
+POST /api/v1/allocation/optimize
+GET  /api/v1/allocation/{id}
+PUT  /api/v1/allocation/{id}/override
+POST /api/v1/allocation/{id}/reoptimize
+POST /api/v1/forecast/demand
+POST /api/v1/forecast/surge
+GET  /api/v1/explain/district/{name}
+GET  /api/v1/explain/allocation/{id}
+```
+
+---
+
+## MongoDB Collections (11 total)
+
+| Collection | Unique Key | Key Indexes |
+|---|---|---|
+| `districts` | `district` | `vulnerability_score`, `state`, `2dsphere(location)` |
+| `warehouses` | `warehouse_id` | `district`, `2dsphere(location)` |
+| `shelters` | `shelter_id` | `district`, `2dsphere(location)` |
+| `hospitals` | `hospital_id` | `district`, `2dsphere(location)` |
+| `disasters` | `dis_no` | `year`, `disaster_type`, `2dsphere(location)` |
+| `road_network` | compound `(source,target)` | `failure_probability` |
+| `simulation_runs` | `run_id` | `created_at`, `status` |
+| `forecasts` | `forecast_id` | `district`, `model_type`, `created_at` |
+| `allocations` | `allocation_id` | `simulation_run_id`, `district` |
+| `users` | `email` | `role`, `is_active` |
+| `overrides` | `override_id` | `allocation_id`, `user_id` |
+
+---
+
+## Verification Plan
+
+### Backend
+```bash
+cd backend
+pytest tests/ -v --asyncio-mode=auto
+uvicorn app.main:app --reload
+# Open http://localhost:8000/docs → test all endpoints via Swagger UI
+```
+
+### Frontend
+```bash
+cd frontend
+npm run dev
+# Open http://localhost:5173 → verify all pages render
+```
+
+### Data Load Verification
+```bash
+python -m app.core.data_loader --export-dir ../data/exports/
+# Check MongoDB Atlas / Compass: all 11 collections populated
+```
+
+---
+
+## Open Questions
+
+> [!IMPORTANT]
+> **Real Data Files**: Do you have real EM-DAT, NFHS-5, or GIS files to put in `data/raw/`? The backend works with synthetic data from the notebook but real files give accurate scores.
+
+> [!IMPORTANT]
+> **MongoDB**: Do you have MongoDB Community Edition already installed locally, or should I include setup instructions?
+
+> [!NOTE]
+> **LGD Coverage**: The notebook uses a ~50-district sample. Full India coverage needs the complete LGD CSV (~750 districts). Starting with the 50-district sample is fine for development.

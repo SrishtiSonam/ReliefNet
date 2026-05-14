@@ -1,0 +1,2 @@
+# reliefnet/backend/app/db/__init__.py
+"""Database package initialization."""

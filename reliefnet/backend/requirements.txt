@@ -1,0 +1,33 @@
+# ReliefNet Backend — Python Dependencies
+
+# --- Web Framework ---
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+starlette>=0.36.0
+
+# --- Data Validation & Settings ---
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+pydantic[email]               # for EmailStr in auth
+
+# --- Database (MongoDB async) ---
+motor>=3.3.0
+pymongo>=4.6.0
+
+# --- Authentication ---
+python-jose[cryptography]>=3.3.0
+passlib[bcrypt]>=1.7.4
+python-multipart>=0.0.9        # required for OAuth2PasswordRequestForm
+
+# --- Data / ML (used by ml_services imported in backend) ---
+pandas>=2.2.0
+numpy>=1.26.0
+xgboost>=2.0.0
+scikit-learn>=1.4.0
+networkx>=3.2.0
+
+# --- Optimization ---
+pulp>=2.8.0
+
+# --- Logging / Misc ---
+python-dotenv>=1.0.1
