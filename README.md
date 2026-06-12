@@ -1,363 +1,273 @@
-# 🌍 ReliefNet — Unified AI Disaster Intelligence & Humanitarian Logistics Platform
+# ReliefNet — AI-Powered Disaster Relief Logistics Platform
 
-> Production-grade AI platform combining stochastic resource allocation, reinforcement learning, real-time human coordination, and offline-first mobile capabilities for disaster response.
+> Full-stack platform combining reinforcement learning, constrained optimization, GIS routing, and explainable AI for post-disaster resource allocation — built on real India flood datasets.
 
-ReliefNet merges reinforcement learning, constrained optimization, surge-aware forecasting, GIS-based routing, and explainable human-in-the-loop coordination into a resilient disaster response framework capable of operating under infrastructure collapse, uncertain demand, and rapidly evolving emergencies — including in field conditions with no internet connectivity.
+ReliefNet optimizes the dispatch of trucks and UAVs from pre-positioned warehouses to disaster-affected districts. It merges stochastic infrastructure simulation, RL-based planning, fairness-constrained MILP, and a human-in-the-loop override workflow into a single operational platform.
 
 ---
 
-## ✨ Dual Methodology Architecture
+## Architecture Overview
 
 ### Method 1 — AI-Based Stochastic Dynamic Resource Allocation
-Focuses on intelligent allocation and routing of disaster relief resources using:
-- Approximate Dynamic Programming
-- Reinforcement Learning (PPO & MAPPO)
-- Mixed Integer Linear Programming (MILP)
-- Multi-Agent Coordination
-- Truck + UAV Hybrid Logistics
+Intelligent allocation and routing of relief resources using:
+- **PPO** (Stable-Baselines3) for single-agent warehouse dispatching
+- **MAPPO** (custom PyTorch CTDE) for multi-agent fleet coordination
+- **MILP** (PuLP) for fairness-constrained allocation
+- **NetworkX** for risk-aware road graph routing
+- Truck + UAV hybrid logistics with last-mile drone delivery
 
-**Core objectives:**
-- Minimize deprivation cost
-- Optimize allocation fairness
-- Adapt to dynamic road failures
-- Coordinate heterogeneous fleets
-- Reduce delivery latency
-
-### Method 2 — Integrated Disaster Awareness & Human Coordination Platform
-Focuses on operational transparency, collaboration, and public engagement through:
-- Citizen emergency portals
-- Live responder dashboards
-- Human-in-the-loop AI overrides
-- Explainable AI reasoning
-- Public shelter and alert systems
-- Infrastructure monitoring
-- **Offline-first mobile app for field responders**
+### Method 2 — Operational Awareness & Human Coordination
+Real-time coordination and public engagement through:
+- Citizen emergency request portal
+- Responder triage dashboard
+- Human-in-the-Loop (HITL) AI override workflow
+- SHAP-based explainable AI reasoning
+- District and warehouse monitoring dashboards
 
 ---
 
-## 🚀 8-Phase Unified Workflow
+## 8-Phase Workflow
 
 | Phase | Name | What Happens |
 |---|---|---|
-| 1 | Multi-Source Disaster Intelligence | Gathers GIS, population, warehouse, weather, and live citizen data |
-| 2 | Surge-Aware Demand Forecasting | ARIMA, GARCH, Transformer, XGBoost predict demand spikes |
-| 3 | Infrastructure & Risk Simulation | Models flood propagation, road collapse, connectivity failure |
-| 4 | RL-Based Multi-Agent Decision Engine | PPO/MAPPO agents dispatch trucks, UAVs, and inventory |
-| 5 | Fairness-Constrained Optimization | PuLP MILP ensures equitable distribution, Gini minimization |
-| 6 | GIS-Based Adaptive Routing | NetworkX + hazard scores compute safe truck/UAV routes |
-| 7 | Explainable AI & HITL Coordination | SHAP explanations + human override workflows |
-| 8 | Public & Authority Portals | Central, state, and citizen dashboards + field responder mobile app |
+| 1 | Multi-Source Disaster Intelligence | GIS, population, warehouse, weather, citizen request data |
+| 2 | Demand Forecasting | XGBoost predicts district-level relief demand |
+| 3 | Infrastructure & Risk Simulation | Stochastic flood propagation, road collapse, damage accumulation |
+| 4 | RL Decision Engine | PPO/MAPPO agents dispatch trucks and UAVs |
+| 5 | Fairness-Constrained Optimization | PuLP MILP minimizes shortage, transport cost, and Gini inequality |
+| 6 | GIS-Based Adaptive Routing | NetworkX computes safe routes on dynamically degraded road graph |
+| 7 | Explainable AI & HITL | SHAP explanations + human override and re-optimization |
+| 8 | Dashboards & Public Portal | Operator dashboards, citizen request portal, request triage |
 
 ---
 
-## 📱 Offline-First Mobile App for Field Responders
+## AI & ML Stack
 
-Field responders operate in the most infrastructure-deprived environments — no internet, no cell signal, unreliable GPS. The ReliefNet mobile app is built offline-first: every critical workflow functions without a network connection and syncs automatically when connectivity is restored.
-
-### Core Principles
-
-- **Offline by default** — all core screens render from local storage; network is an enhancement, not a requirement
-- **Conflict-aware sync** — last-write-wins with server-authoritative conflict resolution and manual override prompts
-- **Minimal data footprint** — pre-cached district maps, assignment data, and supply manifests are compressed and bounded in size
-- **Battery-conscious** — sync intervals back off exponentially; background work is deferred when battery is below 20%
-
-### Key Screens & Workflows
-
-| Screen | Offline Capable | Description |
+| Component | Technology | Status |
 |---|---|---|
-| Assignment Dashboard | ✅ | Current vehicle assignments, delivery targets, priority scores |
-| GIS Route Map | ✅ | Pre-cached OpenStreetMap tiles for assigned districts |
-| Supply Manifest | ✅ | Inventory loaded, delivered, and remaining per vehicle |
-| Emergency Requests | ✅ | Queued citizen requests with severity and location |
-| Delivery Confirmation | ✅ | Mark deliveries complete; syncs to server on reconnect |
-| HITL Override | ⚠️ Partial | Log override intent offline; submission requires connectivity |
-| Live Vehicle Tracking | ❌ | Requires WebSocket; shows last-known position when offline |
-
-### Tech Stack
-
-| Layer | Technology | Purpose |
-|---|---|---|
-| Framework | React Native (Expo) | Cross-platform iOS + Android |
-| Local DB | WatermelonDB | High-performance offline SQLite with sync |
-| Sync Engine | WatermelonDB Sync Protocol | Delta sync with conflict resolution |
-| Map Tiles | react-native-maps + MapLibre | Offline tile caching per district |
-| State | Zustand | Shared app state |
-| Background Sync | Expo BackgroundFetch | Periodic sync when app is backgrounded |
-| Push Notifications | Expo Notifications | Assignment and alert delivery |
-| Auth | JWT (same as backend) | Token stored in SecureStore |
-| Connectivity Detection | NetInfo | Switches online/offline mode automatically |
-
-### Offline Data Architecture
-
-```text
-On Login / Shift Start:
-  ↓ Download & cache to WatermelonDB
-  - Active assignments for this responder
-  - Supply manifest for assigned vehicle
-  - Citizen emergency requests (district-filtered)
-  - Map tiles for assigned districts (bounded radius)
-  - Shelter locations and alert templates
-
-During Field Operation (no network):
-  - Read / write entirely from local WatermelonDB
-  - All mutations queued in local change log
-  - Timestamps and responder ID stamped locally
-
-On Reconnect:
-  - WatermelonDB sync runs delta push + pull
-  - Server resolves conflicts (last-write-wins by default)
-  - Responder notified of any overwritten local changes
-  - New assignments and updated routes pulled immediately
-```
-
-### Sync Flow
-
-```text
-App detects connectivity (NetInfo)
-   ↓
-WatermelonDB Sync → POST /sync/push   (local changes → server)
-                  ← GET  /sync/pull   (server changes → local)
-   ↓
-Conflict resolution:
-  - Non-conflicting: merged silently
-  - Conflicting: server wins + UI toast shown to responder
-   ↓
-Background sync scheduled (Expo BackgroundFetch, 5-min intervals)
-   ↓
-Exponential backoff if sync fails (1m → 2m → 4m → max 30m)
-```
-
-### Offline Map Caching
-
-Pre-cached OpenStreetMap tiles are downloaded at login scoped to the responder's assigned district(s). The tile cache is bounded at 200 MB per device. MapLibre renders fully offline from the local tile store. Hazard overlays (flood zones, blocked roads) are stored as GeoJSON alongside tiles and refreshed on sync.
-
-```text
-At shift start:
-  → Fetch district GeoJSON bounding box
-  → Download tiles for zoom levels 10–16
-  → Store in MapLibre offline tile cache
-  → Download hazard overlays as GeoJSON
-  → Ready for offline navigation
-```
-
-### Project Structure (Mobile)
-
-```text
-reliefnet/
-└── mobile/
-    ├── app/
-    │   ├── screens/
-    │   │   ├── AssignmentDashboard/
-    │   │   ├── RouteMap/
-    │   │   ├── SupplyManifest/
-    │   │   ├── EmergencyRequests/
-    │   │   ├── DeliveryConfirmation/
-    │   │   └── HITLOverride/
-    │   ├── components/
-    │   │   ├── OfflineBanner/         ← shows when offline
-    │   │   ├── SyncStatusIndicator/
-    │   │   └── HazardOverlay/
-    │   ├── db/
-    │   │   ├── schema.js              ← WatermelonDB schema
-    │   │   ├── models/                ← Assignment, Request, Delivery
-    │   │   └── sync.js                ← push/pull sync logic
-    │   ├── store/
-    │   │   └── useAppStore.js         ← Zustand global state
-    │   ├── hooks/
-    │   │   ├── useConnectivity.js     ← NetInfo wrapper
-    │   │   └── useSync.js             ← manual + auto sync
-    │   ├── maps/
-    │   │   ├── OfflineTileManager.js  ← tile download + cache mgmt
-    │   │   └── HazardLayer.js         ← GeoJSON overlay renderer
-    │   └── notifications/
-    │       └── push.js                ← Expo Notifications setup
-    ├── app.config.js
-    ├── package.json
-    └── README.md
-```
-
-### Backend Sync API (FastAPI additions)
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/sync/push` | Receive batched local mutations from device |
-| GET | `/sync/pull` | Return delta of server changes since last sync timestamp |
-| GET | `/sync/tiles/:district` | Stream pre-tiled GeoJSON for offline map caching |
-| GET | `/sync/manifest/:vehicleId` | Download supply manifest for offline use |
-
-### Installation & Setup (Mobile)
-
-#### Prerequisites
-- Node.js 18+
-- Expo CLI: `npm install -g expo`
-- Android Studio or Xcode for device emulation
-
-```bash
-cd mobile
-npm install
-expo start
-```
-
-For device testing:
-```bash
-expo run:android   # or
-expo run:ios
-```
-
-### Environment Variables (Mobile)
-
-```env
-EXPO_PUBLIC_API_URL=http://localhost:8000
-EXPO_PUBLIC_WS_URL=ws://localhost:8000/ws
-EXPO_PUBLIC_TILE_CACHE_MB=200
-EXPO_PUBLIC_SYNC_INTERVAL_SEC=300
-```
+| RL Agent (Single) | PPO via Stable-Baselines3 | Implemented |
+| RL Agent (Multi) | MAPPO — custom PyTorch CTDE | Implemented (training loop stub) |
+| Optimization | PuLP MILP solver | Implemented |
+| Demand Forecasting | XGBoost (trained model saved) | Implemented |
+| Explainability | SHAP (`TreeExplainer`) | Implemented |
+| Disaster Simulation | Custom stochastic engine | Implemented |
+| Fairness Metrics | Gini coefficient, max-min fairness | Implemented |
+| RL Environment | Custom Gymnasium `DisasterReliefEnv` | Implemented |
+| GIS Routing | NetworkX shortest path + hazard weights | Implemented |
 
 ---
 
-## 🤖 AI & ML Stack
-
-| Component | Technology | Purpose |
-|---|---|---|
-| RL Agent (Single) | PPO via Stable-Baselines3 | Single-vehicle dispatching |
-| RL Agent (Multi) | MAPPO via Stable-Baselines3 | Multi-agent fleet coordination |
-| Optimization | PuLP MILP Solver | Fairness-constrained resource allocation |
-| Demand Forecasting | ARIMA, GARCH, XGBoost, Transformers | Surge prediction |
-| Explainability | SHAP | Allocation transparency |
-| Infrastructure | Gymnasium | RL environment simulation |
-| Deep Learning | PyTorch | Neural value function approximation |
-| GIS Routing | NetworkX | Road network graph algorithms |
-
----
-
-## 🏗️ Tech Stack
+## Tech Stack
 
 ### Backend
-- **FastAPI** — high-performance async REST API
-- **MongoDB** — flexible document store for disaster events and logistics data
-- **Motor** — async MongoDB driver for FastAPI
-- **Pydantic** — data validation and schema enforcement
-- **JWT Authentication** — stateless auth for responders and authorities
 
-### Frontend
-- **React** — component-based UI
-- **Vite** — fast dev and build tooling
-- **Tailwind CSS** — utility-first styling
-- **Zustand** — lightweight global state
-- **Framer Motion** — animations and dashboard transitions
-- **Recharts** — analytics charts and forecast visualizations
+| Package | Version | Role |
+|---|---|---|
+| **FastAPI** | ≥0.110 | Async REST API framework |
+| **Uvicorn** | ≥0.29 | ASGI server |
+| **Starlette** | ≥0.36 | ASGI toolkit (used directly for responses) |
+| **Pydantic v2** | ≥2.6 | Request/response schema validation |
+| **pydantic-settings** | ≥2.2 | `.env`-based `Settings` class |
+| **Motor** | ≥3.3 | Async MongoDB driver |
+| **PyMongo** | ≥4.6 | Sync MongoDB utilities (index creation, seeding) |
+| **python-jose[cryptography]** | ≥3.3 | JWT encoding and decoding |
+| **passlib[bcrypt]** | ≥1.7 | Password hashing |
+| **python-multipart** | ≥0.0.9 | OAuth2 form body parsing |
+| **python-dotenv** | ≥1.0 | `.env` file loading |
 
-### Mobile (Field Responders)
-- **React Native (Expo)** — cross-platform iOS + Android
-- **WatermelonDB** — offline-first local database with sync
-- **MapLibre + react-native-maps** — offline tile rendering
-- **Expo BackgroundFetch** — background sync scheduling
-- **NetInfo** — connectivity detection
+**API modules (v1):** `auth` · `allocation` · `disasters` · `districts` · `explainability` · `forecasting` · `requests` · `simulation` · `warehouses`
 
-### GIS & Visualization
-- **Leaflet + React-Leaflet** — interactive disaster maps (web)
-- **MapLibre** — offline tile rendering (mobile)
-- **OpenStreetMap** — base map tile layer
-- **NetworkX** — road network graph and routing algorithms
-
-### Deployment
-- **Docker** — containerized services
-- **Kubernetes** — orchestration and horizontal scaling
-- **CI/CD Pipelines** — automated build and deploy
+**Roles:** `CITIZEN` · `RESPONDER` · `STATE_AUTHORITY` · `CENTRAL_AUTHORITY`
 
 ---
 
-## 📂 Project Structure
+### Frontend
+
+| Package | Version | Role |
+|---|---|---|
+| **React** | 19.x | UI framework |
+| **TypeScript** | ~6.0 | Static typing |
+| **Vite** | 8.x | Dev server and bundler |
+| **Tailwind CSS** | v4.3 | Utility-first styling |
+| **Zustand** | 5.x | Global state (`authStore`, `districtStore`) |
+| **TanStack Query** | 5.x | Server state, caching, background refetch |
+| **React Router DOM** | 7.x | Client-side routing |
+| **Axios** | 1.x | HTTP client with JWT interceptor |
+| **Recharts** | 3.x | Charts and analytics visualizations |
+| **Leaflet + React-Leaflet** | 1.9 / 5.x | Interactive GIS maps (OpenStreetMap tiles) |
+| **Lucide React** | 1.x | Icon library |
+| **clsx + tailwind-merge** | — | Conditional class name utilities |
+
+**Pages:** `Dashboard` · `DistrictMonitor` · `WarehouseMonitor` · `SimulationPage` · `AllocationView` · `PublicPortal` · `RequestsView` · `Settings` · `Login`
+
+**Key components:** `RLSimulationDashboard` · `HumanOverrideDashboard` · `ReliefMap` · `MainLayout` · `StatCard`
+
+---
+
+### AI / ML
+
+| Package | Role |
+|---|---|
+| **Stable-Baselines3** | PPO single-agent RL training and inference |
+| **PyTorch** | Custom MAPPO actor-critic networks (CTDE architecture) |
+| **Gymnasium** | Custom `DisasterReliefEnv` RL environment |
+| **PuLP (CBC solver)** | MILP for fairness-constrained resource allocation |
+| **NetworkX** | Road network graph, shortest-path routing with hazard weights |
+| **XGBoost** | Demand forecasting (trained model persisted as `demand_forecaster.json`) |
+| **SHAP** | `TreeExplainer` for per-feature allocation transparency |
+| **scikit-learn** | Preprocessing and feature pipelines |
+| **NumPy** | Array operations throughout ML stack |
+| **Pandas** | Data manipulation, CSV ingestion, feature engineering |
+
+**Custom implementations:**
+- `DisasterSimulator` — stochastic flood graph-diffusion + probabilistic road collapse per step
+- `MAPPOAgentFramework` — centralized training / decentralized execution (CTDE) from scratch in PyTorch
+- `LogisticsOptimizer` — MILP that jointly minimizes shortage + transport cost + Gini unfairness
+- `FairnessMetrics` — Gini coefficient and max-min fairness calculations
+- `DisasterReliefEnv` — Gymnasium environment wrapping the simulator for RL training
+
+---
+
+### Infrastructure & Tooling
+
+| Tool | Role |
+|---|---|
+| **Docker** | Containerised backend, frontend, and MongoDB |
+| **Docker Compose** | Multi-service orchestration |
+| **nginx** | Static file serving + SPA fallback routing for frontend |
+| **Jupyter Notebook** | EDA, data pipeline, model training entrypoint (`reliefnet_notebook.ipynb`) |
+| **ESLint** | Frontend linting (react-hooks + react-refresh plugins) |
+| **Git** | Version control |
+
+---
+
+### Datasets
+
+| Dataset | Format | Content |
+|---|---|---|
+| EM-DAT Database | XLSX | Historical global disaster events — deaths, affected, damage (USD) |
+| IndoFloods — flood events | CSV | India flood events with discharge, severity, duration |
+| IndoFloods — catchment characteristics | CSV | Drainage area, slope, land use per catchment |
+| IndoFloods — precipitation variables | CSV | Rainfall metrics per event |
+| IndoFloods — metadata | CSV | Station and basin metadata |
+| India District Dataset | CSV | District-level demographics and geographic features |
+| India Flood Inventory v3 | CSV | Georeferenced flood polygons across India |
+| flood_risk_dataset_india | CSV | District-level flood risk scores |
+| DFSI | CSV | District Flood Severity Index |
+| District_FloodedArea | CSV | Flooded area per district per event |
+| District_FloodImpact | CSV | Impact metrics per district per event |
+| Kerala district-wise details | CSV | District-level flood details, Kerala |
+| Kerala warnings (actual vs. predicted) | CSV | Forecast validation data |
+| Post Offices | CSV | Geographic distribution of India post offices |
+| State Hazard Atlases | PDF | Flood zone maps — AP, Bihar, UP, Odisha, West Bengal, Kerala, Assam |
+| Processed exports | CSV | `reliefnet_district_features.csv`, `reliefnet_road_network.csv` (generated by notebook) |
+
+---
+
+### Not Implemented
+
+The following appear in older documentation but are **not present** in the codebase:
+
+- ARIMA / GARCH forecasting — only XGBoost is implemented; `forecasting/service.py` is a placeholder stub
+- MAPPO training loop — `update()` method is a documented stub; only inference (`get_actions`) is functional
+- Mobile app (React Native / Expo / WatermelonDB) — no `mobile/` directory exists
+- Framer Motion — listed in inner README but not in `package.json`
+- Prometheus / monitoring — no metrics instrumentation
+- Test suite — no `pytest` or Vitest test files
+
+---
+
+## Project Structure
 
 ```text
-reliefnet/
-├── backend/
-│   ├── api/
-│   │   ├── disasters/
-│   │   ├── vehicles/
-│   │   ├── warehouses/
-│   │   ├── routing/
-│   │   ├── alerts/
-│   │   └── sync/                      ← NEW: mobile sync endpoints
-│   ├── auth/
-│   ├── hitl/
-│   ├── simulation/
-│   ├── websocket/
-│   └── main.py
+ReliefNet/
+├── reliefnet/
+│   ├── backend/
+│   │   ├── app/
+│   │   │   ├── api/v1/            # REST endpoints
+│   │   │   │   ├── auth.py
+│   │   │   │   ├── allocation.py
+│   │   │   │   ├── disasters.py
+│   │   │   │   ├── districts.py
+│   │   │   │   ├── explainability.py
+│   │   │   │   ├── forecasting.py
+│   │   │   │   ├── requests.py
+│   │   │   │   ├── simulation.py
+│   │   │   │   └── warehouses.py
+│   │   │   ├── core/
+│   │   │   │   ├── auth/          # JWT handler, role guards
+│   │   │   │   ├── explainability/# SHAP service
+│   │   │   │   ├── hitl/          # Override workflow
+│   │   │   │   ├── optimization/  # MILP service
+│   │   │   │   └── simulation/    # Flood model, shortage estimator
+│   │   │   ├── db/
+│   │   │   │   ├── mongo.py
+│   │   │   │   └── repositories/  # allocation, disaster, district, warehouse, ...
+│   │   │   ├── models/            # Pydantic schemas
+│   │   │   └── main.py
+│   │   └── requirements.txt
+│   │
+│   ├── frontend/
+│   │   └── src/
+│   │       ├── pages/             # Dashboard, DistrictMonitor, WarehouseMonitor,
+│   │       │                      # SimulationPage, AllocationView, PublicPortal,
+│   │       │                      # RequestsView, Settings, Login
+│   │       ├── components/
+│   │       │   ├── layout/        # MainLayout
+│   │       │   ├── map/           # ReliefMap (Leaflet)
+│   │       │   ├── rl/            # RLSimulationDashboard, HumanOverrideDashboard
+│   │       │   └── cards/         # StatCard
+│   │       ├── api/               # allocationApi, districtApi, simulationApi, ...
+│   │       └── store/             # authStore, districtStore (Zustand)
+│   │
+│   ├── ml_services/
+│   │   ├── environments/          # DisasterReliefEnv (Gymnasium)
+│   │   ├── rl_agents/             # ppo_agent.py, mappo_agent.py
+│   │   ├── optimization/          # logistics_optimizer.py (MILP), route_planner.py
+│   │   ├── simulation/            # disaster_simulator.py
+│   │   ├── explainability/        # shap_explainer.py, rl_explainer.py
+│   │   ├── forecasting/           # xgboost_service.py, service.py
+│   │   ├── fairness/              # fairness_metrics.py
+│   │   ├── models/                # demand_forecaster.json (saved XGBoost)
+│   │   └── training_pipeline.py
+│   │
+│   ├── data/exports/              # reliefnet_district_features.csv, reliefnet_road_network.csv
+│   ├── scratch/                   # generate_synthetic_data.py
+│   └── reliefnet_notebook.ipynb   # EDA, training, data pipeline
 │
-├── frontend/
-│   ├── dashboards/
-│   │   ├── CentralAuthorityDashboard/
-│   │   ├── StateAuthorityDashboard/
-│   │   └── ResponderDashboard/
-│   ├── citizen_portal/
-│   ├── authority_portal/
-│   ├── maps/
-│   └── analytics/
+├── datasets/                      # Raw India flood datasets (CSVs, PDFs)
+│   ├── EM-DAT Database.xlsx
+│   ├── India_Flood_Inventory_v3.csv
+│   ├── flood_risk_dataset_india.csv
+│   ├── India_District_Dataset.csv
+│   └── Flood PDF/                 # State hazard atlases
 │
-├── mobile/                            ← NEW: offline-first field app
-│   ├── app/
-│   │   ├── screens/
-│   │   ├── components/
-│   │   ├── db/
-│   │   ├── store/
-│   │   ├── hooks/
-│   │   ├── maps/
-│   │   └── notifications/
-│   ├── app.config.js
-│   └── package.json
-│
-├── ml_services/
-│   ├── environments/
-│   ├── rl_agents/
-│   ├── optimization/
-│   ├── forecasting/
-│   ├── routing/
-│   ├── simulation/
-│   └── explainability/
-│
-├── gis/
-├── datasets/
-├── notebooks/
-├── deployment/
-│   ├── Dockerfile
-│   ├── kubernetes/
-│   └── nginx/
-├── .env.example
+├── Research Papers/               # 20 academic papers on disaster logistics & RL
 ├── docker-compose.yml
+├── .env.example
 └── README.md
 ```
 
 ---
 
-## 🗄️ Key Data Models (MongoDB)
+## Key Data Models (MongoDB)
 
 ```python
-# Disaster Event
+# DisasterEvent (from EM-DAT)
 {
-  "_id": ObjectId,
-  "type": "flood | earthquake | cyclone",
-  "severity": 1-5,
-  "epicenter": { "lat": float, "lng": float },
-  "affected_districts": [str],
-  "started_at": datetime,
-  "status": "active | contained | resolved"
-}
-
-# Vehicle
-{
-  "_id": ObjectId,
-  "type": "truck | uav",
-  "capacity": float,
-  "current_location": { "lat": float, "lng": float },
-  "status": "idle | dispatched | en_route | delivered",
-  "assigned_warehouse": str,
-  "payload": [{ "item": str, "quantity": int }]
+  "dis_no": str,
+  "disaster_type": str,           # flood | earthquake | cyclone
+  "district": str,
+  "district_lgd_code": str,
+  "total_deaths": float,
+  "total_affected": float,
+  "latitude": float, "longitude": float,
+  "season": str,                  # Monsoon | Post-Monsoon | Winter | Pre-Monsoon
+  "recency_weight": float
 }
 
 # Warehouse
 {
-  "_id": ObjectId,
   "location": { "lat": float, "lng": float },
   "district": str,
   "inventory": [{ "item": str, "quantity": int }],
@@ -367,268 +277,197 @@ reliefnet/
 
 # Citizen Emergency Request
 {
-  "_id": ObjectId,
-  "reporter_id": str,
   "location": { "lat": float, "lng": float },
   "needs": ["food", "water", "medical", "rescue"],
   "severity": "low | medium | critical",
-  "status": "pending | assigned | resolved",
-  "submitted_at": datetime
+  "status": "pending | assigned | resolved"
 }
 
-# Mobile Sync Record (NEW)
+# AllocationPlan
 {
-  "_id": ObjectId,
-  "responder_id": str,
-  "device_id": str,
-  "last_pulled_at": datetime,
-  "last_pushed_at": datetime,
-  "pending_mutations": int,
-  "sync_status": "synced | pending | conflict"
+  "truck_allocations": { "(warehouse, district)": int },
+  "uav_allocations":   { "(warehouse, district)": int },
+  "final_shortages":   { "district": float },
+  "objective_value": float,
+  "status": "Optimal | Infeasible"
 }
 ```
 
 ---
 
-## 🔐 Authentication Flow (JWT)
+## Authentication
 
 ```text
-Responder / Authority / Citizen registers
-   ↓
-POST /auth/login → { username, password }
-   ↓
-Password verified → JWT issued (access + refresh)
-   ↓
-All API requests: Authorization: Bearer <token>
-   ↓
-Role-based access: CITIZEN | RESPONDER | STATE_AUTHORITY | CENTRAL_AUTHORITY
+POST /api/v1/auth/login → JWT (access + refresh)
+All endpoints: Authorization: Bearer <token>
 ```
 
-**Mobile:** JWT stored in Expo SecureStore. Refresh tokens used to maintain sessions across shifts without re-login.
-
-**Roles & Access:**
+**Roles:**
 
 | Role | Access |
 |---|---|
 | CITIZEN | Emergency requests, shelter maps, alerts |
-| RESPONDER | Vehicle tracking, delivery updates, HITL overrides, **mobile field app** |
-| STATE_AUTHORITY | Roadblock reporting, district coordination |
+| RESPONDER | Vehicle tracking, delivery updates, HITL overrides |
+| STATE_AUTHORITY | District coordination, roadblock reporting |
 | CENTRAL_AUTHORITY | Full dashboard, AI plans, analytics, audit |
 
 ---
 
-## 🧪 End-to-End Simulation Flow
+## Simulation Flow
 
 ```text
-Step 1: Configure Disaster
-        → type, severity, epicenter, weather
-
-Step 2: Predict Demand Surge
-        → ARIMA/GARCH/XGBoost forecast demand by district
-
-Step 3: Simulate Infrastructure Failure
-        → road collapse probability, connectivity loss, accessibility scores
-
-Step 4: AI Allocation Planning
-        → PPO/MAPPO agents dispatch trucks + UAVs
-        → PuLP MILP optimizes fairness constraints
-
-Step 5: Human Review (HITL)
-        → Operator inspects SHAP explanations
-        → Modifies constraints, excludes warehouses, re-prioritizes
-        → Approves or rejects AI plan
-
-Step 6: Execute Logistics
-        → Routes dispatched, live tracking via WebSocket
-        → UAVs handle inaccessible last-mile delivery
-        → Field responders receive assignments on mobile app
-        → Deliveries confirmed via mobile even when offline
-        → Audit log updated in real time on sync
+1. Configure disaster (type, epicenter, severity)
+2. DisasterSimulator propagates flood intensity + infrastructure damage per step
+3. Dynamic road collapse: edges fail stochastically based on node damage
+4. PPO/MAPPO agents predict dispatch actions
+5. PuLP MILP refines allocation under fairness + capacity constraints
+6. Operator reviews SHAP-explained plan via HITL dashboard
+7. Overrides applied → re-optimization triggered
+8. Final plan dispatched; citizen portal and request triage updated
 ```
 
 ---
 
-## 🌐 Portal Overview
+## API Endpoints
 
-### Central Authority Dashboard
-- Live vehicle and UAV tracking on GIS map
-- AI allocation monitoring with SHAP explanations
-- Forecast visualization (demand surge charts)
-- Warehouse inventory analytics
-- Full simulation control panel
-
-### State Authority Dashboard
-- District-level resource overview
-- Roadblock and connectivity reporting
-- Relief request management
-- Coordination with central authority
-
-### Citizen Portal
-- Submit emergency requests with location
-- View nearest shelters on map
-- Receive real-time alerts and safety guidelines
-- Track request status
-
-### Field Responder Mobile App *(NEW)*
-- Offline-first assignment and delivery management
-- Pre-cached district maps with hazard overlays
-- Supply manifest tracking
-- Citizen emergency request queue
-- Background sync with conflict resolution
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/auth/login` | Authenticate and receive JWT |
+| GET | `/api/v1/districts/` | List all districts |
+| GET | `/api/v1/warehouses/` | List warehouses with inventory |
+| GET | `/api/v1/disasters/` | Query disaster events |
+| POST | `/api/v1/simulation/run` | Run disaster simulation step |
+| POST | `/api/v1/allocation/optimize` | Run MILP allocation |
+| GET | `/api/v1/forecast/` | District demand forecast |
+| GET | `/api/v1/explain/` | SHAP explanations for allocation |
+| GET/POST | `/api/v1/requests/` | Citizen emergency requests |
+| GET | `/health` | Health check |
 
 ---
 
-## 🤖 Key Innovations
+## Installation & Setup
 
-**AI + Optimization Hybrid** — RL agents plan, MILP optimizes, humans approve.
+### Docker (recommended)
 
-**Dynamic Truck-UAV Collaboration** — trucks for bulk transport, UAVs for inaccessible last-mile delivery.
+```bash
+cp .env.example .env
+# Edit .env — set JWT_SECRET_KEY to a random string
 
-**Fairness-Aware Allocation** — Max-Min fairness and Gini minimization ensure remote districts are never neglected.
+docker-compose up --build
+```
 
-**Explainable AI** — SHAP values provide transparent reasoning for every allocation decision.
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8000 |
+| API docs (Swagger) | http://localhost:8000/docs |
+| MongoDB | localhost:27017 (internal) |
 
-**Human-in-the-Loop** — Operators can override, constrain, and re-trigger AI at any phase.
+To seed initial data:
 
-**Real-Time Infrastructure Failure Simulation** — continuously adapts to evolving road and warehouse conditions.
-
-**Offline-First Field Operations** — field responders operate fully offline; delta sync restores shared state on reconnect.
+```bash
+docker-compose exec backend python seed.py
+```
 
 ---
 
-## ⚙️ Installation & Setup
+### Manual Setup
 
-### Prerequisites
+#### Prerequisites
 - Python 3.10+
 - Node.js 18+
-- MongoDB
-- Docker (optional)
-- Expo CLI (mobile): `npm install -g expo`
+- MongoDB (local or Atlas)
 
-### Backend
+#### Backend
 
 ```bash
-cd backend
+cd reliefnet/backend
 python -m venv env
-source env/bin/activate        # Windows: .\env\Scripts\activate
+.\env\Scripts\activate          # Windows
+# source env/bin/activate       # macOS/Linux
+
 pip install -r requirements.txt
-uvicorn main:app --reload
+pip install gymnasium "stable-baselines3[extra]" shap \
+            torch --index-url https://download.pytorch.org/whl/cpu
+
+# Create a .env file in reliefnet/backend/ (see .env.example)
+uvicorn app.main:app --reload
 ```
 
-### ML Services
+#### Frontend
 
 ```bash
-cd ml_services
-pip install -r requirements.txt
-python rl_agents/PPO/train.py      # Train PPO agent
-python rl_agents/MAPPO/train.py    # Train MAPPO agents
-```
-
-### Frontend
-
-```bash
-cd frontend
+cd reliefnet/frontend
 npm install
 npm run dev
 ```
 
-### Mobile (Field Responder App)
+#### ML Training Pipeline
+
+Run the Jupyter notebook first to generate district features and road network exports:
 
 ```bash
-cd mobile
-npm install
-expo start
+cd reliefnet
+jupyter notebook reliefnet_notebook.ipynb
 ```
 
-### Docker (All Services)
+Then run the training pipeline:
 
 ```bash
-docker-compose up --build
+cd reliefnet
+python -m ml_services.training_pipeline
 ```
 
 ---
 
-## 🔑 Environment Variables
+## Environment Variables
 
 ```env
-# Backend
-MONGO_URI=mongodb://localhost:27017/reliefnet
-JWT_SECRET=
+# Backend (matches pydantic-settings field names in config.py)
+MONGO_URI=mongodb://localhost:27017/
+MONGO_DB=reliefnet
+JWT_SECRET_KEY=<your-secret-key>
 JWT_ALGORITHM=HS256
-JWT_EXPIRE_MINUTES=60
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+CORS_ORIGINS=http://localhost:5173,http://localhost:3000
+LOG_LEVEL=INFO
+DATA_EXPORT_DIR=../data/exports
 
-# ML Services
-RL_MODEL_PATH=./ml_services/rl_agents/
-OPTIMIZATION_TIMEOUT=300
-
-# Frontend
-VITE_API_URL=http://localhost:8000
-VITE_WS_URL=ws://localhost:8000/ws
-
-# Mobile
-EXPO_PUBLIC_API_URL=http://localhost:8000
-EXPO_PUBLIC_WS_URL=ws://localhost:8000/ws
-EXPO_PUBLIC_TILE_CACHE_MB=200
-EXPO_PUBLIC_SYNC_INTERVAL_SEC=300
-
-# Deployment
-PROMETHEUS_ENABLED=True
+# Frontend (Vite build-time injection)
+VITE_API_URL=http://localhost:8000/api/v1
 ```
 
 ---
 
-## 📦 Requirements
+## Key Innovations
 
-```text
-# Backend
-fastapi
-uvicorn
-motor
-pymongo
-pydantic
-python-jose[cryptography]
+**RL + MILP Hybrid** — PPO/MAPPO agents plan dispatch strategies; PuLP MILP enforces capacity and fairness constraints simultaneously.
 
-# ML Services
-stable-baselines3
-gymnasium
-pulp
-shap
-xgboost
-torch
-networkx
-numpy
-pandas
-scikit-learn
+**Fairness-Aware Allocation** — Max-Min fairness and Gini minimization prevent remote or low-priority districts from being neglected under resource scarcity.
 
-# Mobile
-react-native / expo
-@nozbe/watermelondb
-react-native-maps
-maplibre-react-native
-@react-native-community/netinfo
-expo-background-fetch
-expo-notifications
-expo-secure-store
-zustand
-```
+**Stochastic Infrastructure Failure** — The `DisasterSimulator` models flood propagation as a graph diffusion process; edges fail probabilistically as node damage accumulates, forcing the optimizer to reroute in real time.
+
+**Truck + UAV Coordination** — MILP jointly optimizes truck routes on the degraded road graph and UAV flights over the unimpeded air graph for last-mile isolated zones.
+
+**Explainable AI** — SHAP `TreeExplainer` provides feature-level contribution scores for every demand forecast, giving operators transparent reasoning before they approve or override the AI plan.
+
+**Human-in-the-Loop** — Operators can exclude warehouses, cap vehicle counts, or override district priorities mid-simulation; the system re-runs optimization under the new constraints.
 
 ---
 
-## 🌍 Research Foundation
+## Research Foundation
 
-Based on academic research:
-**"Stochastic Dynamic Post-Disaster Inventory Allocation Using Trucks and UAVs with Integrated Awareness Platform"**
+Based on academic research in stochastic post-disaster inventory allocation using trucks and UAVs, extended with:
+- Multi-agent PPO (MAPPO) with centralized training / decentralized execution
+- Fairness-constrained MILP (Gini minimization, max-min fairness)
+- SHAP explainability layer for allocation transparency
+- Real-time citizen coordination and HITL override workflows
+- India-specific flood data (EM-DAT, IndoFloods, state hazard atlases)
 
-Extended with:
-- MAPPO multi-agent reinforcement learning
-- Neural value function approximation
-- Fairness-constrained MILP
-- SHAP explainability layer
-- Real-time citizen coordination portals
-- Offline-first mobile field operations
+20 reference papers are included in `Research Papers/`.
 
 ---
 
-## 🛡️ License
+## License
 
 MIT License
